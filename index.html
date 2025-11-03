@@ -1,1 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyXC Live Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        :root {
+            --primary-orange: #FF6600;
+            --orange-dark: #E55A00;
+            --orange-light: #FF8533;
+            --orange-pale: #FFE5D9;
+            --dark: #1A1A1A;
+            --dark-light: #2D2D2D;
+            --gray: #666666;
+            --gray-light: #999999;
+            --light: #F5F5F5;
+            --white: #FFFFFF;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: var(--white);
+        }
+
+        /* Header/Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            text-decoration: none;
+        }
+
+        .logo-highlight {
+            color: var(--primary-orange);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary-orange);
+        }
+
+        .live-badge {
+            background: var(--success);
+            color: white;
+            padding: 0.35rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Main Content */
+        main {
+            padding-top: 70px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-light) 100%);
+            color: white;
+            padding: 3rem 0 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            opacity: 0.85;
+        }
+
+        /* Search & Filters */
+        .controls {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid var(--light);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            opacity: 0.5;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .filter-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--light);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+        }
+
+        /* Meet Cards */
+        .meets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .meet-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .meet-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            border-color: var(--primary-orange);
+        }
+
+        .meet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .meet-header h3 {
+            font-size: 1.3rem;
+            color: var(--dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .meet-date {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .meet-location {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .meet-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--light);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-orange);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Results Table */
+        .results-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .section-header h2 {
+            font-size: 1.8rem;
+            color: var(--dark);
+        }
+
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--success);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .refresh-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results-table thead {
+            background: var(--light);
+        }
+
+        .results-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray);
+        }
+
+        .results-table tbody tr {
+            border-bottom: 1px solid var(--light);
+            transition: all 0.3s ease;
+        }
+
+        .results-table tbody tr:hover {
+            background: #FAFAFA;
+        }
+
+        .results-table tbody tr.new-result {
+            animation: highlightRow 2s ease-out;
+        }
+
+        @keyframes highlightRow {
+            0% { background: #FFF3E0; }
+            100% { background: transparent; }
+        }
+
+        .results-table td {
+            padding: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .place-cell {
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .place-medal {
+            margin-right: 0.5rem;
+        }
+
+        .athlete-name {
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .team-name {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .time-cell {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary-orange);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--light);
+            border-top-color: var(--primary-orange);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Page Navigation */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .meets-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .results-table {
+                font-size: 0.85rem;
+            }
+
+            .results-table th,
+            .results-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        /* Highlight/Badge Styles */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-live {
+            background: var(--success);
+            color: white;
+        }
+
+        .badge-completed {
+            background: var(--gray-light);
+            color: white;
+        }
+
+        .badge-upcoming {
+            background: var(--primary-orange);
+            color: white;
+        }
+
+        /* Event Tabs */
+        .event-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .event-tab {
+            padding: 0.75rem 1.5rem;
+            background: var(--light);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .event-tab:hover {
+            background: var(--orange-pale);
+        }
+
+        .event-tab.active {
+            background: var(--primary-orange);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo" data-page="home">
+                EasyXC <span class="logo-highlight">Live</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#" data-page="home" class="active">Home</a></li>
+                <li><a href="#" data-page="meets">Meets</a></li>
+                <li><a href="#" data-page="results">Results</a></li>
+                <li><a href="#" data-page="teams">Teams</a></li>
+                <li><a href="#" data-page="rankings">Rankings</a></li>
+                <li><a href="#" data-page="contact">Contact</a></li>
+                <li><span class="live-badge">● LIVE</span></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- HOME PAGE -->
+        <div id="home-page" class="page active">
+            <div class="hero">
+                <div class="container">
+                    <h1>Live Cross Country Results</h1>
+                    <p>Real-time race results, rankings, and team standings</p>
+                </div>
+            </div>
+
+            <div class="container">
+                <!-- Search -->
+                <div class="controls">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="homeSearch" placeholder="Search athletes, teams, or meets...">
+                    </div>
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label>Status</label>
+                            <select id="homeStatusFilter">
+                                <option value="all">All Meets</option>
+                                <option value="live">Live Now</option>
+                                <option value="upcoming">Upcoming</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Gender</label>
+                            <select id="homeGenderFilter">
+                                <option value="all">All</option>
+                                <option value="boys">Boys</option>
+                                <option value="girls">Girls</option>
+                                <option value="mixed">Mixed</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Date Range</label>
+                            <select id="homeDateFilter">
+                                <option value="all">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Meets Grid -->
+                <div id="meetsContainer">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading meets...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MEETS PAGE -->
+        <div id="meets-page" class="page">
+            <div class="hero">
+                <div class="container">
+                    <h1>All Meets</h1>
+                    <p>Browse all cross country meets and competitions</p>
+                </div>
+            </div>
+            <div class="container">
+                <div class="controls">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="meetsSearch" placeholder="Search meets...">
+                    </div>
+                </div>
+                <div id="allMeetsContainer">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading meets...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESULTS PAGE -->
+        <div id="results-page" class="page">
+            <div class="hero">
+                <div class="container">
+                    <h1 id="resultsTitle">Live Results</h1>
+                    <p id="resultsSubtitle">Real-time race results</p>
+                </div>
+            </div>
+            <div class="container">
+                <div class="results-section">
+                    <div class="section-header">
+                        <h2>Race Results</h2>
+                        <div class="auto-refresh">
+                            <div class="refresh-dot"></div>
+                            <span>Auto-updating</span>
+                        </div>
+                    </div>
+
+                    <!-- Event Tabs -->
+                    <div id="eventTabs" class="event-tabs"></div>
+
+                    <!-- Results Table -->
+                    <div id="resultsTableContainer">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading results...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEAMS PAGE -->
+        <div id="teams-page" class="page">
+            <div class="hero">
+                <div class="container">
+                    <h1>Teams</h1>
+                    <p>Browse teams and school performance</p>
+                </div>
+            </div>
+            <div class="container">
+                <div class="empty-state">
+                    <div class="empty-icon">🏫</div>
+                    <h3>Teams Directory</h3>
+                    <p>Team profiles and statistics coming soon</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RANKINGS PAGE -->
+        <div id="rankings-page" class="page">
+            <div class="hero">
+                <div class="container">
+                    <h1>Rankings</h1>
+                    <p>Top athletes and team rankings</p>
+                </div>
+            </div>
+            <div class="container">
+                <div class="empty-state">
+                    <div class="empty-icon">🏆</div>
+                    <h3>Rankings</h3>
+                    <p>Season rankings and leaderboards coming soon</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTACT PAGE -->
+        <div id="contact-page" class="page">
+            <div class="hero">
+                <div class="container">
+                    <h1>Contact Us</h1>
+                    <p>Get in touch with the EasyXC team</p>
+                </div>
+            </div>
+            <div class="container">
+                <div class="results-section" style="max-width: 600px; margin: 0 auto;">
+                    <h3 style="margin-bottom: 1rem;">Send us a message</h3>
+                    <p style="color: var(--gray); margin-bottom: 2rem;">
+                        Have questions, feedback, or need support? We'd love to hear from you!
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div>
+                            <strong>Email:</strong> support@easyxc.com
+                        </div>
+                        <div>
+                            <strong>GitHub:</strong> <a href="https://github.com/yourusername/easyxc" style="color: var(--primary-orange);">github.com/yourusername/easyxc</a>
+                        </div>
+                        <div>
+                            <strong>Discord:</strong> Join our community server
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // ===========================================
+        // SUPABASE CONFIGURATION
+        // ===========================================
+        // Replace these with your actual Supabase credentials
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+        
+        let supabase = null;
+        let currentMeetId = null;
+        let currentEventId = null;
+        let resultsSubscription = null;
+        let previousResultIds = new Set();
+
+        // Initialize Supabase client
+        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY_HERE') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // ===========================================
+        // NAVIGATION
+        // ===========================================
+        function showPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageName + '-page').classList.add('active');
+            
+            // Update nav active state
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[data-page="${pageName}"]`).classList.add('active');
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Load page-specific data
+            if (pageName === 'home') {
+                loadMeets();
+            } else if (pageName === 'meets') {
+                loadAllMeets();
+            }
+        }
+
+        // ===========================================
+        // DATA FETCHING
+        // ===========================================
+        async function loadMeets() {
+            const container = document.getElementById('meetsContainer');
+            
+            if (!supabase) {
+                // Show demo data if Supabase not configured
+                displayDemoMeets(container);
+                return;
+            }
+
+            try {
+                const { data: meets, error } = await supabase
+                    .from('meets')
+                    .select('*')
+                    .order('date', { ascending: false })
+                    .limit(20);
+
+                if (error) throw error;
+
+                if (meets && meets.length > 0) {
+                    displayMeets(meets, container);
+                } else {
+                    displayDemoMeets(container);
+                }
+            } catch (error) {
+                console.error('Error loading meets:', error);
+                displayDemoMeets(container);
+            }
+        }
+
+        async function loadAllMeets() {
+            const container = document.getElementById('allMeetsContainer');
+            
+            if (!supabase) {
+                displayDemoMeets(container);
+                return;
+            }
+
+            try {
+                const { data: meets, error } = await supabase
+                    .from('meets')
+                    .select('*')
+                    .order('date', { ascending: false });
+
+                if (error) throw error;
+
+                if (meets && meets.length > 0) {
+                    displayMeets(meets, container);
+                } else {
+                    displayDemoMeets(container);
+                }
+            } catch (error) {
+                console.error('Error loading meets:', error);
+                displayDemoMeets(container);
+            }
+        }
+
+        async function loadMeetDetails(meetId) {
+            currentMeetId = meetId;
+            
+            if (!supabase) {
+                displayDemoResults();
+                return;
+            }
+
+            try {
+                // Load meet info
+                const { data: meet, error: meetError } = await supabase
+                    .from('meets')
+                    .select('*')
+                    .eq('id', meetId)
+                    .single();
+
+                if (meetError) throw meetError;
+
+                // Update page title
+                document.getElementById('resultsTitle').textContent = meet.name;
+                document.getElementById('resultsSubtitle').textContent = `${meet.location} • ${new Date(meet.date).toLocaleDateString()}`;
+
+                // Load events for this meet
+                const { data: events, error: eventsError } = await supabase
+                    .from('events')
+                    .select('*')
+                    .eq('meet_id', meetId)
+                    .order('name');
+
+                if (eventsError) throw eventsError;
+
+                displayEventTabs(events);
+
+                if (events && events.length > 0) {
+                    loadEventResults(events[0].id);
+                }
+            } catch (error) {
+                console.error('Error loading meet details:', error);
+                displayDemoResults();
+            }
+        }
+
+        async function loadEventResults(eventId) {
+            currentEventId = eventId;
+            
+            if (!supabase) {
+                displayDemoResults();
+                return;
+            }
+
+            const container = document.getElementById('resultsTableContainer');
+            
+            try {
+                const { data: results, error } = await supabase
+                    .from('results')
+                    .select('*')
+                    .eq('event_id', eventId)
+                    .order('place');
+
+                if (error) throw error;
+
+                displayResults(results, container);
+                
+                // Set up real-time subscription
+                setupRealtimeSubscription(eventId);
+            } catch (error) {
+                console.error('Error loading results:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">❌</div>
+                        <h3>Error Loading Results</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ===========================================
+        // REAL-TIME UPDATES
+        // ===========================================
+        function setupRealtimeSubscription(eventId) {
+            // Unsubscribe from previous channel
+            if (resultsSubscription) {
+                resultsSubscription.unsubscribe();
+            }
+
+            if (!supabase) return;
+
+            // Subscribe to results changes for this event
+            resultsSubscription = supabase
+                .channel(`results-${eventId}`)
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'results',
+                    filter: `event_id=eq.${eventId}`
+                }, (payload) => {
+                    console.log('Real-time update:', payload);
+                    loadEventResults(eventId);
+                })
+                .subscribe();
+        }
+
+        // ===========================================
+        // DISPLAY FUNCTIONS
+        // ===========================================
+        function displayMeets(meets, container) {
+            container.innerHTML = '<div class="meets-grid"></div>';
+            const grid = container.querySelector('.meets-grid');
+
+            meets.forEach(meet => {
+                const card = createMeetCard(meet);
+                grid.appendChild(card);
+            });
+        }
+
+        function createMeetCard(meet) {
+            const card = document.createElement('div');
+            card.className = 'meet-card';
+            card.onclick = () => {
+                loadMeetDetails(meet.id);
+                showPage('results');
+            };
+
+            const date = new Date(meet.date);
+            const today = new Date();
+            const isToday = date.toDateString() === today.toDateString();
+            const isPast = date < today && !isToday;
+            const isFuture = date > today;
+
+            let statusBadge = '';
+            if (isToday) {
+                statusBadge = '<span class="badge badge-live">LIVE</span>';
+            } else if (isPast) {
+                statusBadge = '<span class="badge badge-completed">COMPLETED</span>';
+            } else if (isFuture) {
+                statusBadge = '<span class="badge badge-upcoming">UPCOMING</span>';
+            }
+
+            card.innerHTML = `
+                <div class="meet-header">
+                    <div>
+                        <h3>${meet.name}</h3>
+                        <div class="meet-date">${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>
+                    </div>
+                    ${statusBadge}
+                </div>
+                <div class="meet-location">
+                    📍 ${meet.location}
+                </div>
+                <div class="meet-stats">
+                    <div class="stat">
+                        <span class="stat-number">${meet.event_count || 8}</span>
+                        <span class="stat-label">Events</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">${meet.team_count || 24}</span>
+                        <span class="stat-label">Teams</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">${meet.athlete_count || 156}</span>
+                        <span class="stat-label">Athletes</span>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function displayEventTabs(events) {
+            const container = document.getElementById('eventTabs');
+            container.innerHTML = '';
+
+            events.forEach((event, index) => {
+                const tab = document.createElement('button');
+                tab.className = 'event-tab' + (index === 0 ? ' active' : '');
+                tab.textContent = `${event.name} (${event.gender})`;
+                tab.onclick = () => {
+                    document.querySelectorAll('.event-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    loadEventResults(event.id);
+                };
+                container.appendChild(tab);
+            });
+        }
+
+        function displayResults(results, container) {
+            if (!results || results.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🏃</div>
+                        <h3>No Results Yet</h3>
+                        <p>Results will appear here as athletes finish</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let tableHTML = `
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Place</th>
+                            <th>Athlete</th>
+                            <th>Team</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            results.forEach(result => {
+                const isNew = !previousResultIds.has(result.id);
+                if (isNew) previousResultIds.add(result.id);
+
+                let medal = '';
+                if (result.place === 1) medal = '🥇';
+                else if (result.place === 2) medal = '🥈';
+                else if (result.place === 3) medal = '🥉';
+
+                tableHTML += `
+                    <tr class="${isNew ? 'new-result' : ''}">
+                        <td class="place-cell">
+                            <span class="place-medal">${medal}</span> ${result.place}
+                        </td>
+                        <td>
+                            <div class="athlete-name">${result.athlete_name}</div>
+                        </td>
+                        <td class="team-name">${result.team_name}</td>
+                        <td class="time-cell">${result.time}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+
+        // ===========================================
+        // DEMO DATA (for when Supabase is not configured)
+        // ===========================================
+        function displayDemoMeets(container) {
+            const demoMeets = [
+                {
+                    id: 1,
+                    name: 'State Championship 2025',
+                    date: new Date().toISOString(),
+                    location: 'Lincoln Park, Chicago',
+                    event_count: 8,
+                    team_count: 32,
+                    athlete_count: 245
+                },
+                {
+                    id: 2,
+                    name: 'Regional Qualifier',
+                    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                    location: 'Central Park, New York',
+                    event_count: 6,
+                    team_count: 24,
+                    athlete_count: 180
+                },
+                {
+                    id: 3,
+                    name: 'Invitational Meet',
+                    date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+                    location: 'Golden Gate Park, San Francisco',
+                    event_count: 10,
+                    team_count: 40,
+                    athlete_count: 312
+                },
+                {
+                    id: 4,
+                    name: 'Conference Championship',
+                    date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                    location: 'Washington Park, Portland',
+                    event_count: 8,
+                    team_count: 28,
+                    athlete_count: 220
+                }
+            ];
+
+            displayMeets(demoMeets, container);
+        }
+
+        function displayDemoResults() {
+            document.getElementById('resultsTitle').textContent = 'Demo Meet - State Championship';
+            document.getElementById('resultsSubtitle').textContent = 'Lincoln Park, Chicago • November 3, 2025';
+
+            const demoEvents = [
+                { id: 1, name: 'Varsity 5K', gender: 'Boys' },
+                { id: 2, name: 'Varsity 5K', gender: 'Girls' },
+                { id: 3, name: 'JV 5K', gender: 'Boys' },
+                { id: 4, name: 'JV 5K', gender: 'Girls' }
+            ];
+
+            displayEventTabs(demoEvents);
+
+            const demoResults = [
+                { id: 1, place: 1, athlete_name: 'John Smith', team_name: 'Central High School', time: '15:23.4' },
+                { id: 2, place: 2, athlete_name: 'Michael Johnson', team_name: 'North Valley HS', time: '15:45.2' },
+                { id: 3, place: 3, athlete_name: 'David Williams', team_name: 'East Side Academy', time: '15:52.8' },
+                { id: 4, place: 4, athlete_name: 'Chris Brown', team_name: 'West Lake High', time: '16:01.3' },
+                { id: 5, place: 5, athlete_name: 'James Davis', team_name: 'South Ridge HS', time: '16:15.7' },
+                { id: 6, place: 6, athlete_name: 'Robert Miller', team_name: 'Central High School', time: '16:22.1' },
+                { id: 7, place: 7, athlete_name: 'Daniel Wilson', team_name: 'North Valley HS', time: '16:34.5' },
+                { id: 8, place: 8, athlete_name: 'Matthew Moore', team_name: 'East Side Academy', time: '16:41.9' },
+                { id: 9, place: 9, athlete_name: 'Joseph Taylor', team_name: 'West Lake High', time: '16:55.2' },
+                { id: 10, place: 10, athlete_name: 'Thomas Anderson', team_name: 'South Ridge HS', time: '17:03.6' }
+            ];
+
+            displayResults(demoResults, document.getElementById('resultsTableContainer'));
+        }
+
+        // ===========================================
+        // SEARCH & FILTERS
+        // ===========================================
+        function setupSearchAndFilters() {
+            const searchInputs = ['homeSearch', 'meetsSearch'];
+            searchInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', (e) => {
+                        // Implement search logic here
+                        console.log('Searching:', e.target.value);
+                    });
+                }
+            });
+
+            const filters = ['homeStatusFilter', 'homeGenderFilter', 'homeDateFilter'];
+            filters.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    select.addEventListener('change', (e) => {
+                        // Implement filter logic here
+                        console.log('Filter changed:', id, e.target.value);
+                    });
+                }
+            });
+        }
+
+        // ===========================================
+        // INITIALIZATION
+        // ===========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set up navigation
+            document.querySelectorAll('[data-page]').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showPage(link.dataset.page);
+                });
+            });
+
+            // Set up search and filters
+            setupSearchAndFilters();
+
+            // Load initial data
+            loadMeets();
+
+            // Log Supabase status
+            if (supabase) {
+                console.log('✅ Supabase connected');
+            } else {
+                console.log('⚠️ Supabase not configured - showing demo data');
+                console.log('To connect to Supabase:');
+                console.log('1. Replace SUPABASE_URL with your project URL');
+                console.log('2. Replace SUPABASE_ANON_KEY with your anon/public key');
+            }
+        });
+
+        // Clean up subscriptions on page unload
+        window.addEventListener('beforeunload', () => {
+            if (resultsSubscription) {
+                resultsSubscription.unsubscribe();
+            }
+        });
+    </script>
+</body>
+</html>
