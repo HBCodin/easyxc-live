@@ -23,6 +23,7 @@
             --light: #F5F5F5;
             --white: #FFFFFF;
             --success: #10b981;
+            --danger: #ef4444;
         }
 
         body {
@@ -263,6 +264,7 @@
             transition: all 0.3s ease;
             cursor: pointer;
             border: 2px solid transparent;
+            position: relative;
         }
 
         .meet-card:hover {
@@ -271,10 +273,44 @@
             border-color: var(--primary-orange);
         }
 
+        .meet-card-actions {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            background: white;
+            border: 2px solid var(--light);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .btn-icon:hover {
+            border-color: var(--primary-orange);
+            color: var(--primary-orange);
+            transform: scale(1.1);
+        }
+
+        .btn-icon.danger:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
         .meet-header h3 {
             font-size: 1.3rem;
             color: var(--dark);
             margin-bottom: 0.5rem;
+            padding-right: 80px;
         }
 
         .meet-date {
@@ -306,8 +342,13 @@
             color: white;
         }
 
-        .badge-finished {
-            background: var(--gray-light);
+        .badge-private {
+            background: var(--gray);
+            color: white;
+        }
+
+        .badge-public {
+            background: var(--primary-orange);
             color: white;
         }
 
@@ -333,113 +374,41 @@
             color: var(--dark);
         }
 
-        .auto-refresh {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--success);
-            font-size: 0.9rem;
-            font-weight: 600;
+        .event-list {
+            display: grid;
+            gap: 1rem;
         }
 
-        .refresh-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--success);
-            border-radius: 50%;
-            animation: blink 1.5s ease-in-out infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .event-card {
+        .event-item {
             background: var(--light);
             border-radius: 12px;
             padding: 1.5rem;
-            margin-bottom: 1.5rem;
             border-left: 4px solid var(--primary-orange);
-        }
-
-        .event-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .event-header h3 {
-            font-size: 1.3rem;
-            color: var(--dark);
-        }
-
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .results-table thead {
-            background: var(--dark);
-            color: white;
-        }
-
-        .results-table th {
-            padding: 1rem;
-            text-align: left;
-            font-weight: 700;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .results-table tbody tr {
-            border-bottom: 1px solid var(--light);
             transition: all 0.3s ease;
         }
 
-        .results-table tbody tr:hover {
+        .event-item:hover {
             background: #FAFAFA;
+            transform: translateX(4px);
         }
 
-        .results-table tbody tr.new-result {
-            animation: highlightRow 2s ease-out;
-        }
-
-        @keyframes highlightRow {
-            0% { background: #FFF3E0; }
-            100% { background: transparent; }
-        }
-
-        .results-table td {
-            padding: 1rem;
-            font-size: 0.95rem;
-        }
-
-        .place-cell {
-            font-weight: 800;
+        .event-info h3 {
             font-size: 1.2rem;
             color: var(--dark);
+            margin-bottom: 0.25rem;
         }
 
-        .place-medal {
-            margin-right: 0.5rem;
+        .event-meta {
+            color: var(--gray);
+            font-size: 0.9rem;
         }
 
-        .athlete-name {
-            font-weight: 700;
-            color: var(--dark);
-        }
-
-        .time-cell {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--primary-orange);
-            font-family: 'Courier New', monospace;
+        .event-actions {
+            display: flex;
+            gap: 0.5rem;
         }
 
         .loading {
@@ -569,6 +538,56 @@
             box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
         }
 
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--gray-light);
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle input:checked + .toggle-slider {
+            background-color: var(--primary-orange);
+        }
+
+        .toggle input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
         .btn-primary {
             background: var(--primary-orange);
             color: white;
@@ -590,6 +609,40 @@
         .btn-primary:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-light);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
         }
 
         .auth-tabs {
@@ -638,44 +691,13 @@
             border: 2px solid #ef4444;
         }
 
-        .forgot-password-link {
-            text-align: right;
-            margin-top: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .forgot-password-link a {
-            color: var(--primary-orange);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .forgot-password-link a:hover {
-            text-decoration: underline;
-        }
-
-        .btn-secondary {
-            background: var(--light);
-            color: var(--dark);
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 1rem;
-        }
-
-        .btn-secondary:hover {
-            background: var(--gray-light);
-            color: white;
-        }
-
         @media (max-width: 768px) {
             .nav-links {
-                display: none;
+                gap: 1rem;
+            }
+
+            .nav-links a {
+                font-size: 0.85rem;
             }
 
             .hero h1 {
@@ -688,15 +710,6 @@
 
             .container {
                 padding: 1rem;
-            }
-
-            .results-table {
-                font-size: 0.85rem;
-            }
-
-            .results-table th,
-            .results-table td {
-                padding: 0.75rem 0.5rem;
             }
         }
     </style>
@@ -725,7 +738,7 @@
     </nav>
 
     <main>
-        <!-- HOME PAGE - Public View -->
+        <!-- HOME PAGE -->
         <div id="home-page" class="page active">
             <div class="hero">
                 <div class="container">
@@ -736,7 +749,7 @@
             <div class="container">
                 <div class="search-box">
                     <span class="search-icon">🔍</span>
-                    <input type="text" id="homeSearch" placeholder="Search meets...">
+                    <input type="text" id="homeSearch" placeholder="Search public meets...">
                 </div>
                 <div id="publicMeetsContainer">
                     <div class="loading">
@@ -747,13 +760,13 @@
             </div>
         </div>
 
-        <!-- MY MEETS PAGE - User's Meets -->
+        <!-- MY MEETS PAGE -->
         <div id="meets-page" class="page">
             <div class="hero">
                 <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <div>
                         <h1>My Meets</h1>
-                        <p>Manage your cross country meets and live results</p>
+                        <p>Manage your cross country meets and events</p>
                     </div>
                     <button class="btn-nav" id="createMeetBtn" style="display: none;">+ Create Meet</button>
                 </div>
@@ -769,19 +782,22 @@
             </div>
         </div>
 
-        <!-- MEET DETAILS PAGE - Live Results -->
+        <!-- MEET DETAILS PAGE -->
         <div id="meet-details-page" class="page">
             <div class="hero">
-                <div class="container">
-                    <h1 id="meetDetailsTitle">Meet Details</h1>
-                    <p id="meetDetailsSubtitle">Live results and event information</p>
+                <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h1 id="meetDetailsTitle">Meet Details</h1>
+                        <p id="meetDetailsSubtitle">Manage events and view results</p>
+                    </div>
+                    <button class="btn-nav" id="addEventBtn" style="display: none;">+ Add Event</button>
                 </div>
             </div>
             <div class="container">
-                <div id="liveResultsContainer">
+                <div id="meetEventsContainer">
                     <div class="loading">
                         <div class="loading-spinner"></div>
-                        <p>Loading live results...</p>
+                        <p>Loading events...</p>
                     </div>
                 </div>
             </div>
@@ -795,15 +811,12 @@
                 <h2>Welcome</h2>
                 <button class="close-modal" id="closeAuthModal">×</button>
             </div>
-
             <div class="alert alert-error" id="authError"></div>
             <div class="alert alert-success" id="authSuccess"></div>
-
             <div class="auth-tabs">
                 <button class="auth-tab-btn active" data-tab="login">Sign In</button>
                 <button class="auth-tab-btn" data-tab="signup">Sign Up</button>
             </div>
-
             <div id="loginTab">
                 <form id="loginForm">
                     <div class="form-group">
@@ -814,13 +827,9 @@
                         <label>Password</label>
                         <input type="password" id="loginPassword" required>
                     </div>
-                    <div class="forgot-password-link">
-                        <a id="forgotPasswordLink">Forgot Password?</a>
-                    </div>
                     <button type="submit" class="btn-primary">Sign In</button>
                 </form>
             </div>
-
             <div id="signupTab" style="display: none;">
                 <form id="signupForm">
                     <div class="form-group">
@@ -841,43 +850,16 @@
         </div>
     </div>
 
-    <!-- Forgot Password Modal -->
-    <div class="modal" id="forgotPasswordModal">
+    <!-- Create/Edit Meet Modal -->
+    <div class="modal" id="meetModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Reset Password</h2>
-                <button class="close-modal" id="closeForgotPasswordModal">×</button>
+                <h2 id="meetModalTitle">Create New Meet</h2>
+                <button class="close-modal" id="closeMeetModal">×</button>
             </div>
-
-            <div class="alert alert-error" id="forgotPasswordError"></div>
-            <div class="alert alert-success" id="forgotPasswordSuccess"></div>
-
-            <form id="forgotPasswordForm">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="forgotPasswordEmail" placeholder="Enter your email address" required>
-                </div>
-                <p style="color: var(--gray); font-size: 0.9rem; margin-bottom: 1.5rem;">
-                    We'll send you a link to reset your password.
-                </p>
-                <button type="submit" class="btn-primary">Send Reset Link</button>
-                <button type="button" class="btn-secondary" onclick="document.getElementById('forgotPasswordModal').classList.remove('active'); document.getElementById('authModal').classList.add('active');">Back to Sign In</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Create Meet Modal -->
-    <div class="modal" id="createMeetModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Create New Meet</h2>
-                <button class="close-modal" id="closeCreateMeetModal">×</button>
-            </div>
-
-            <div class="alert alert-error" id="createMeetError"></div>
-            <div class="alert alert-success" id="createMeetSuccess"></div>
-
-            <form id="createMeetForm">
+            <div class="alert alert-error" id="meetError"></div>
+            <div class="alert alert-success" id="meetSuccess"></div>
+            <form id="meetForm">
                 <div class="form-group">
                     <label>Meet Name *</label>
                     <input type="text" id="meetName" placeholder="e.g., State Championship 2025" required>
@@ -890,23 +872,82 @@
                     <label>Location *</label>
                     <input type="text" id="meetLocation" placeholder="e.g., Lincoln Park, Chicago" required>
                 </div>
-                <button type="submit" class="btn-primary">Create Meet</button>
+                <div class="form-group">
+                    <label>Privacy</label>
+                    <div class="toggle-group">
+                        <span>Private</span>
+                        <label class="toggle">
+                            <input type="checkbox" id="meetIsPublic">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span>Public</span>
+                    </div>
+                    <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.5rem;">
+                        Public meets are visible to everyone. Private meets are only visible to you.
+                    </p>
+                </div>
+                <button type="submit" class="btn-primary" id="meetSubmitBtn">Create Meet</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Create/Edit Event Modal -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="eventModalTitle">Add Event</h2>
+                <button class="close-modal" id="closeEventModal">×</button>
+            </div>
+            <div class="alert alert-error" id="eventError"></div>
+            <div class="alert alert-success" id="eventSuccess"></div>
+            <form id="eventForm">
+                <div class="form-group">
+                    <label>Event Name *</label>
+                    <input type="text" id="eventName" placeholder="e.g., Varsity Boys 5K" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="eventDescription" rows="3" placeholder="Optional event description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="eventStatus">
+                        <option value="upcoming">Upcoming</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="finished">Finished</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary" id="eventSubmitBtn">Add Event</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirm Delete</h2>
+                <button class="close-modal" id="closeDeleteModal">×</button>
+            </div>
+            <p style="margin-bottom: 1.5rem; color: var(--gray);">
+                Are you sure you want to delete this <span id="deleteType"></span>? This action cannot be undone.
+            </p>
+            <button class="btn-danger" id="confirmDeleteBtn">Delete</button>
+            <button class="btn-secondary" id="cancelDeleteBtn">Cancel</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // ========================================
-        // CONFIGURATION
-        // ========================================
         const SUPABASE_URL = 'https://qegdxnazhozwhqboqnzc.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlZ2R4bmF6aG96d2hxYm9xbnpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIwMDc2NjYsImV4cCI6MjA3NzU4MzY2Nn0.XeD8t-3K0LOhn6FREpdl6W8YNqa-Jxu9z-RfFetHlKI';
 
         let supabase = null;
         let currentUser = null;
         let currentMeetId = null;
-        let liveResultsSubscription = null;
+        let editingMeetId = null;
+        let editingEventId = null;
+        let deleteTarget = null;
 
         if (SUPABASE_URL && SUPABASE_ANON_KEY) {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -916,20 +957,15 @@
         // NAVIGATION
         // ========================================
         function showPage(pageName) {
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             document.getElementById(pageName + '-page').classList.add('active');
             
-            document.querySelectorAll('.nav-links a').forEach(link => {
-                link.classList.remove('active');
-            });
+            document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
             const activeLink = document.querySelector(`[data-page="${pageName}"]`);
             if (activeLink) activeLink.classList.add('active');
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // Load page data
             if (pageName === 'home') {
                 loadPublicMeets();
             } else if (pageName === 'meets' && currentUser) {
@@ -977,16 +1013,12 @@
             }
 
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password
-                });
-
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
 
                 currentUser = data.user;
                 updateAuthUI();
-                document.getElementById('authModal').classList.remove('active');
+                closeModal('authModal');
                 showAlert('authSuccess', 'Signed in successfully!', false);
                 showPage('meets');
             } catch (error) {
@@ -1001,17 +1033,11 @@
             }
 
             try {
-                const { data, error } = await supabase.auth.signUp({
-                    email,
-                    password
-                });
-
+                const { data, error } = await supabase.auth.signUp({ email, password });
                 if (error) throw error;
 
                 showAlert('authSuccess', 'Account created! Please check your email for verification.', false);
-                setTimeout(() => {
-                    document.getElementById('authModal').classList.remove('active');
-                }, 2000);
+                setTimeout(() => closeModal('authModal'), 2000);
             } catch (error) {
                 showAlert('authError', error.message);
             }
@@ -1019,7 +1045,6 @@
 
         async function signOut() {
             if (!supabase) return;
-
             try {
                 await supabase.auth.signOut();
                 currentUser = null;
@@ -1030,31 +1055,8 @@
             }
         }
 
-        async function resetPassword(email) {
-            if (!supabase) {
-                showAlert('forgotPasswordError', 'Database not configured');
-                return;
-            }
-
-            try {
-                const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: window.location.origin
-                });
-
-                if (error) throw error;
-
-                showAlert('forgotPasswordSuccess', 'Password reset link sent! Check your email.', false);
-                setTimeout(() => {
-                    document.getElementById('forgotPasswordModal').classList.remove('active');
-                    document.getElementById('forgotPasswordForm').reset();
-                }, 3000);
-            } catch (error) {
-                showAlert('forgotPasswordError', error.message);
-            }
-        }
-
         // ========================================
-        // PUBLIC MEETS (Home Page - Everyone)
+        // MEETS - CRUD OPERATIONS
         // ========================================
         async function loadPublicMeets() {
             const container = document.getElementById('publicMeetsContainer');
@@ -1064,17 +1066,18 @@
                 const { data: meets, error } = await supabase
                     .from('meets')
                     .select('*')
+                    .eq('is_public', true)
                     .order('date', { ascending: false });
 
                 if (error) throw error;
 
                 if (meets && meets.length > 0) {
-                    displayPublicMeets(meets);
+                    displayMeets(meets, container, false);
                 } else {
                     container.innerHTML = `
                         <div class="empty-state">
                             <div class="empty-icon">🏁</div>
-                            <h3>No Meets Yet</h3>
+                            <h3>No Public Meets Yet</h3>
                             <p>Check back soon for upcoming meets</p>
                         </div>
                     `;
@@ -1091,20 +1094,6 @@
             }
         }
 
-        function displayPublicMeets(meets) {
-            const container = document.getElementById('publicMeetsContainer');
-            container.innerHTML = '<div class="meets-grid"></div>';
-            const grid = container.querySelector('.meets-grid');
-
-            meets.forEach(meet => {
-                const card = createMeetCard(meet, false); // false = not editable
-                grid.appendChild(card);
-            });
-        }
-
-        // ========================================
-        // USER MEETS (My Meets Page)
-        // ========================================
         async function loadUserMeets() {
             const container = document.getElementById('meetsContainer');
             
@@ -1131,14 +1120,14 @@
                 if (error) throw error;
 
                 if (meets && meets.length > 0) {
-                    displayUserMeets(meets);
+                    displayMeets(meets, container, true);
                 } else {
                     container.innerHTML = `
                         <div class="empty-state">
                             <div class="empty-icon">🏁</div>
                             <h3>No Meets Yet</h3>
                             <p>Create your first meet to get started</p>
-                            <button class="btn-primary" onclick="document.getElementById('createMeetModal').classList.add('active')" style="max-width: 300px; margin: 1rem auto;">+ Create Meet</button>
+                            <button class="btn-primary" onclick="openCreateMeetModal()" style="max-width: 300px; margin: 1rem auto;">+ Create Meet</button>
                         </div>
                     `;
                 }
@@ -1154,21 +1143,19 @@
             }
         }
 
-        function displayUserMeets(meets) {
-            const container = document.getElementById('meetsContainer');
+        function displayMeets(meets, container, showActions) {
             container.innerHTML = '<div class="meets-grid"></div>';
             const grid = container.querySelector('.meets-grid');
 
             meets.forEach(meet => {
-                const card = createMeetCard(meet, true); // true = editable
+                const card = createMeetCard(meet, showActions);
                 grid.appendChild(card);
             });
         }
 
-        function createMeetCard(meet, isOwner) {
+        function createMeetCard(meet, showActions) {
             const card = document.createElement('div');
             card.className = 'meet-card';
-            card.onclick = () => loadMeetDetails(meet.id);
 
             const date = new Date(meet.date);
             const formattedDate = date.toLocaleDateString('en-US', { 
@@ -1177,52 +1164,111 @@
                 year: 'numeric' 
             });
 
+            const privacyBadge = meet.is_public 
+                ? '<span class="badge badge-public">Public</span>' 
+                : '<span class="badge badge-private">Private</span>';
+
             card.innerHTML = `
+                ${showActions ? `
+                    <div class="meet-card-actions" onclick="event.stopPropagation()">
+                        <button class="btn-icon" onclick="openEditMeetModal('${meet.id}')" title="Edit Meet">✏️</button>
+                        <button class="btn-icon danger" onclick="confirmDelete('meet', '${meet.id}')" title="Delete Meet">🗑️</button>
+                    </div>
+                ` : ''}
                 <div class="meet-header">
                     <h3>${meet.name}</h3>
                 </div>
                 <div class="meet-date">📅 ${formattedDate}</div>
                 <div class="meet-location">📍 ${meet.location}</div>
-                ${isOwner ? '<span class="badge badge-live">Your Meet</span>' : ''}
+                ${privacyBadge}
             `;
 
+            card.onclick = () => loadMeetDetails(meet.id);
             return card;
         }
 
-        async function createMeet(name, date, location) {
+        async function createOrUpdateMeet(isEdit = false) {
             if (!supabase || !currentUser) {
-                showAlert('createMeetError', 'Please sign in first');
+                showAlert('meetError', 'Please sign in first');
+                return;
+            }
+
+            const name = document.getElementById('meetName').value.trim();
+            const date = document.getElementById('meetDate').value;
+            const location = document.getElementById('meetLocation').value.trim();
+            const isPublic = document.getElementById('meetIsPublic').checked;
+
+            if (!name || !date || !location) {
+                showAlert('meetError', 'Please fill in all required fields');
                 return;
             }
 
             try {
-                const { data, error } = await supabase
-                    .from('meets')
-                    .insert([{
-                        name,
-                        date,
-                        location,
-                        created_by: currentUser.id
-                    }])
-                    .select()
-                    .single();
+                const meetData = {
+                    name,
+                    date,
+                    location,
+                    is_public: isPublic,
+                    created_by: currentUser.id
+                };
 
-                if (error) throw error;
+                let result;
+                if (isEdit && editingMeetId) {
+                    const { data, error } = await supabase
+                        .from('meets')
+                        .update(meetData)
+                        .eq('id', editingMeetId)
+                        .eq('created_by', currentUser.id)
+                        .select()
+                        .single();
+                    
+                    if (error) throw error;
+                    result = data;
+                } else {
+                    const { data, error } = await supabase
+                        .from('meets')
+                        .insert([meetData])
+                        .select()
+                        .single();
+                    
+                    if (error) throw error;
+                    result = data;
+                }
 
-                showAlert('createMeetSuccess', 'Meet created successfully!', false);
+                showAlert('meetSuccess', `Meet ${isEdit ? 'updated' : 'created'} successfully!`, false);
                 setTimeout(() => {
-                    document.getElementById('createMeetModal').classList.remove('active');
-                    document.getElementById('createMeetForm').reset();
+                    closeModal('meetModal');
+                    document.getElementById('meetForm').reset();
                     loadUserMeets();
                 }, 1500);
             } catch (error) {
-                console.error('Error creating meet:', error);
-                showAlert('createMeetError', error.message);
+                console.error('Error saving meet:', error);
+                showAlert('meetError', error.message);
+            }
+        }
+
+        async function deleteMeet(meetId) {
+            if (!supabase || !currentUser) return;
+
+            try {
+                const { error } = await supabase
+                    .from('meets')
+                    .delete()
+                    .eq('id', meetId)
+                    .eq('created_by', currentUser.id);
+
+                if (error) throw error;
+
+                closeModal('deleteModal');
+                loadUserMeets();
+            } catch (error) {
+                console.error('Error deleting meet:', error);
+                alert('Error deleting meet: ' + error.message);
             }
         }
 
         // ========================================
-        // LIVE RESULTS
+        // EVENTS - CRUD OPERATIONS
         // ========================================
         async function loadMeetDetails(meetId) {
             currentMeetId = meetId;
@@ -1231,7 +1277,6 @@
             if (!supabase) return;
 
             try {
-                // Load meet info
                 const { data: meet, error: meetError } = await supabase
                     .from('meets')
                     .select('*')
@@ -1243,14 +1288,17 @@
                 document.getElementById('meetDetailsTitle').textContent = meet.name;
                 document.getElementById('meetDetailsSubtitle').textContent = `${meet.location} • ${new Date(meet.date).toLocaleDateString()}`;
 
-                // Load live results
-                await loadLiveResults(meetId);
+                const addEventBtn = document.getElementById('addEventBtn');
+                if (currentUser && meet.created_by === currentUser.id) {
+                    addEventBtn.style.display = 'block';
+                } else {
+                    addEventBtn.style.display = 'none';
+                }
 
-                // Set up real-time subscription
-                setupLiveResultsSubscription(meetId);
+                await loadMeetEvents(meetId);
             } catch (error) {
                 console.error('Error loading meet details:', error);
-                document.getElementById('liveResultsContainer').innerHTML = `
+                document.getElementById('meetEventsContainer').innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">❌</div>
                         <h3>Error Loading Meet</h3>
@@ -1260,231 +1308,251 @@
             }
         }
 
-        async function loadLiveResults(meetId) {
-            const container = document.getElementById('liveResultsContainer');
+        async function loadMeetEvents(meetId) {
+            const container = document.getElementById('meetEventsContainer');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading events...</p></div>';
 
             try {
-                const { data: liveResults, error } = await supabase
-                    .from('live_results')
+                const { data: events, error } = await supabase
+                    .from('events')
                     .select('*')
                     .eq('meet_id', meetId)
                     .order('created_at', { ascending: true });
 
                 if (error) throw error;
 
-                if (liveResults && liveResults.length > 0) {
-                    displayLiveResults(liveResults);
+                const { data: meet } = await supabase
+                    .from('meets')
+                    .select('created_by')
+                    .eq('id', meetId)
+                    .single();
+
+                const isOwner = currentUser && meet && meet.created_by === currentUser.id;
+
+                if (events && events.length > 0) {
+                    displayEvents(events, container, isOwner);
                 } else {
                     container.innerHTML = `
                         <div class="empty-state">
                             <div class="empty-icon">🏃</div>
-                            <h3>No Live Results Yet</h3>
-                            <p>Results will appear here as they are uploaded from the timing system</p>
+                            <h3>No Events Yet</h3>
+                            <p>${isOwner ? 'Add your first event to get started' : 'No events have been added to this meet'}</p>
+                            ${isOwner ? '<button class="btn-primary" onclick="openCreateEventModal()" style="max-width: 300px; margin: 1rem auto;">+ Add Event</button>' : ''}
                         </div>
                     `;
                 }
             } catch (error) {
-                console.error('Error loading live results:', error);
+                console.error('Error loading events:', error);
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">❌</div>
-                        <h3>Error Loading Results</h3>
+                        <h3>Error Loading Events</h3>
                         <p>${error.message}</p>
                     </div>
                 `;
             }
         }
 
-        function displayLiveResults(liveResults) {
-            const container = document.getElementById('liveResultsContainer');
-            container.innerHTML = '';
+        function displayEvents(events, container, showActions) {
+            container.innerHTML = '<div class="results-section"><div class="section-header"><h2>Events</h2></div><div class="event-list"></div></div>';
+            const eventList = container.querySelector('.event-list');
 
-            // Group by event_name
-            const eventGroups = {};
-            liveResults.forEach(result => {
-                if (!eventGroups[result.event_name]) {
-                    eventGroups[result.event_name] = [];
-                }
-                eventGroups[result.event_name].push(result);
-            });
-
-            // Display each event
-            Object.keys(eventGroups).forEach(eventName => {
-                const eventResults = eventGroups[eventName];
-                const eventCard = createEventCard(eventName, eventResults);
-                container.appendChild(eventCard);
+            events.forEach(event => {
+                const eventItem = createEventItem(event, showActions);
+                eventList.appendChild(eventItem);
             });
         }
 
-        function createEventCard(eventName, results) {
-            const section = document.createElement('div');
-            section.className = 'results-section';
+        function createEventItem(event, showActions) {
+            const item = document.createElement('div');
+            item.className = 'event-item';
 
-            const latestResult = results[results.length - 1];
-            const status = latestResult.event_status || 'in_progress';
-            const statusBadge = status === 'finished' 
-                ? '<span class="badge badge-finished">Finished</span>' 
-                : '<span class="badge badge-live">Live</span>';
+            const statusLabels = {
+                upcoming: 'Upcoming',
+                in_progress: 'In Progress',
+                finished: 'Finished'
+            };
 
-            section.innerHTML = `
-                <div class="section-header">
-                    <h2>${eventName}</h2>
-                    <div class="auto-refresh">
-                        <div class="refresh-dot"></div>
-                        <span>Auto-updating</span>
+            item.innerHTML = `
+                <div class="event-info">
+                    <h3>${event.name}</h3>
+                    <div class="event-meta">
+                        Status: ${statusLabels[event.status] || event.status}
+                        ${event.description ? ` • ${event.description}` : ''}
                     </div>
                 </div>
-                ${statusBadge}
-                <div class="event-results"></div>
+                ${showActions ? `
+                    <div class="event-actions">
+                        <button class="btn-icon" onclick="openEditEventModal('${event.id}')" title="Edit Event">✏️</button>
+                        <button class="btn-icon danger" onclick="confirmDelete('event', '${event.id}')" title="Delete Event">🗑️</button>
+                    </div>
+                ` : ''}
             `;
 
-            const eventResultsContainer = section.querySelector('.event-results');
-
-            // Parse and display result data
-            const resultData = latestResult.result_data || {};
-            
-            // Check if it's race results (array of finishers)
-            if (resultData.results && Array.isArray(resultData.results)) {
-                const table = createResultsTable(resultData.results);
-                eventResultsContainer.appendChild(table);
-            } 
-            // Check if it's team scores
-            else if (resultData.team_scores && Array.isArray(resultData.team_scores)) {
-                const table = createTeamScoresTable(resultData.team_scores);
-                eventResultsContainer.appendChild(table);
-            }
-            // Generic JSON display
-            else {
-                const pre = document.createElement('pre');
-                pre.style.cssText = 'background: var(--light); padding: 1rem; border-radius: 8px; overflow-x: auto;';
-                pre.textContent = JSON.stringify(resultData, null, 2);
-                eventResultsContainer.appendChild(pre);
-            }
-
-            return section;
+            return item;
         }
 
-        function createResultsTable(results) {
-            const table = document.createElement('table');
-            table.className = 'results-table';
-
-            // Sort by place
-            const sortedResults = [...results].sort((a, b) => {
-                const placeA = parseInt(a.place) || 999;
-                const placeB = parseInt(b.place) || 999;
-                return placeA - placeB;
-            });
-
-            let tableHTML = `
-                <thead>
-                    <tr>
-                        <th>Place</th>
-                        <th>Bib</th>
-                        <th>Athlete</th>
-                        <th>Team</th>
-                        <th>Time</th>
-                    </tr>
-                </thead>
-                <tbody>
-            `;
-
-            sortedResults.forEach(result => {
-                const place = parseInt(result.place);
-                let medal = '';
-                if (place === 1) medal = '🥇';
-                else if (place === 2) medal = '🥈';
-                else if (place === 3) medal = '🥉';
-
-                tableHTML += `
-                    <tr class="new-result">
-                        <td class="place-cell">
-                            <span class="place-medal">${medal}</span> ${result.place}
-                        </td>
-                        <td>${result.bib || '-'}</td>
-                        <td class="athlete-name">${result.name || result.athlete_name || 'Unknown'}</td>
-                        <td>${result.team || result.team_name || '-'}</td>
-                        <td class="time-cell">${result.time || '-'}</td>
-                    </tr>
-                `;
-            });
-
-            tableHTML += '</tbody>';
-            table.innerHTML = tableHTML;
-
-            return table;
-        }
-
-        function createTeamScoresTable(teamScores) {
-            const table = document.createElement('table');
-            table.className = 'results-table';
-
-            // Sort by score (lower is better in XC)
-            const sortedScores = [...teamScores].sort((a, b) => {
-                const scoreA = parseInt(a.score) || 999;
-                const scoreB = parseInt(b.score) || 999;
-                return scoreA - scoreB;
-            });
-
-            let tableHTML = `
-                <thead>
-                    <tr>
-                        <th>Place</th>
-                        <th>Team</th>
-                        <th>Score</th>
-                        <th>Top 5</th>
-                    </tr>
-                </thead>
-                <tbody>
-            `;
-
-            sortedScores.forEach((team, index) => {
-                const place = index + 1;
-                let medal = '';
-                if (place === 1) medal = '🥇';
-                else if (place === 2) medal = '🥈';
-                else if (place === 3) medal = '🥉';
-
-                tableHTML += `
-                    <tr>
-                        <td class="place-cell">
-                            <span class="place-medal">${medal}</span> ${place}
-                        </td>
-                        <td class="athlete-name">${team.team_name || team.name}</td>
-                        <td class="time-cell">${team.score}</td>
-                        <td>${team.top_five ? team.top_five.join(', ') : '-'}</td>
-                    </tr>
-                `;
-            });
-
-            tableHTML += '</tbody>';
-            table.innerHTML = tableHTML;
-
-            return table;
-        }
-
-        function setupLiveResultsSubscription(meetId) {
-            // Unsubscribe from previous channel
-            if (liveResultsSubscription) {
-                liveResultsSubscription.unsubscribe();
+        async function createOrUpdateEvent(isEdit = false) {
+            if (!supabase || !currentUser || !currentMeetId) {
+                showAlert('eventError', 'Invalid request');
+                return;
             }
 
-            if (!supabase) return;
+            const name = document.getElementById('eventName').value.trim();
+            const description = document.getElementById('eventDescription').value.trim();
+            const status = document.getElementById('eventStatus').value;
 
-            // Subscribe to live_results changes for this meet
-            liveResultsSubscription = supabase
-                .channel(`live-results-${meetId}`)
-                .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'live_results',
-                    filter: `meet_id=eq.${meetId}`
-                }, (payload) => {
-                    console.log('Real-time update:', payload);
-                    loadLiveResults(meetId);
-                })
-                .subscribe();
+            if (!name) {
+                showAlert('eventError', 'Please enter an event name');
+                return;
+            }
 
-            console.log('✅ Subscribed to live results for meet:', meetId);
+            try {
+                const eventData = {
+                    meet_id: currentMeetId,
+                    name,
+                    description,
+                    status,
+                    created_by: currentUser.id
+                };
+
+                let result;
+                if (isEdit && editingEventId) {
+                    const { data, error } = await supabase
+                        .from('events')
+                        .update(eventData)
+                        .eq('id', editingEventId)
+                        .eq('created_by', currentUser.id)
+                        .select()
+                        .single();
+                    
+                    if (error) throw error;
+                    result = data;
+                } else {
+                    const { data, error } = await supabase
+                        .from('events')
+                        .insert([eventData])
+                        .select()
+                        .single();
+                    
+                    if (error) throw error;
+                    result = data;
+                }
+
+                showAlert('eventSuccess', `Event ${isEdit ? 'updated' : 'created'} successfully!`, false);
+                setTimeout(() => {
+                    closeModal('eventModal');
+                    document.getElementById('eventForm').reset();
+                    loadMeetEvents(currentMeetId);
+                }, 1500);
+            } catch (error) {
+                console.error('Error saving event:', error);
+                showAlert('eventError', error.message);
+            }
+        }
+
+        async function deleteEvent(eventId) {
+            if (!supabase || !currentUser) return;
+
+            try {
+                const { error } = await supabase
+                    .from('events')
+                    .delete()
+                    .eq('id', eventId)
+                    .eq('created_by', currentUser.id);
+
+                if (error) throw error;
+
+                closeModal('deleteModal');
+                loadMeetEvents(currentMeetId);
+            } catch (error) {
+                console.error('Error deleting event:', error);
+                alert('Error deleting event: ' + error.message);
+            }
+        }
+
+        // ========================================
+        // MODAL MANAGEMENT
+        // ========================================
+        function openCreateMeetModal() {
+            editingMeetId = null;
+            document.getElementById('meetModalTitle').textContent = 'Create New Meet';
+            document.getElementById('meetSubmitBtn').textContent = 'Create Meet';
+            document.getElementById('meetForm').reset();
+            openModal('meetModal');
+        }
+
+        async function openEditMeetModal(meetId) {
+            editingMeetId = meetId;
+            document.getElementById('meetModalTitle').textContent = 'Edit Meet';
+            document.getElementById('meetSubmitBtn').textContent = 'Update Meet';
+
+            try {
+                const { data: meet, error } = await supabase
+                    .from('meets')
+                    .select('*')
+                    .eq('id', meetId)
+                    .single();
+
+                if (error) throw error;
+
+                document.getElementById('meetName').value = meet.name;
+                document.getElementById('meetDate').value = meet.date;
+                document.getElementById('meetLocation').value = meet.location;
+                document.getElementById('meetIsPublic').checked = meet.is_public;
+
+                openModal('meetModal');
+            } catch (error) {
+                console.error('Error loading meet:', error);
+                alert('Error loading meet data');
+            }
+        }
+
+        function openCreateEventModal() {
+            editingEventId = null;
+            document.getElementById('eventModalTitle').textContent = 'Add Event';
+            document.getElementById('eventSubmitBtn').textContent = 'Add Event';
+            document.getElementById('eventForm').reset();
+            openModal('eventModal');
+        }
+
+        async function openEditEventModal(eventId) {
+            editingEventId = eventId;
+            document.getElementById('eventModalTitle').textContent = 'Edit Event';
+            document.getElementById('eventSubmitBtn').textContent = 'Update Event';
+
+            try {
+                const { data: event, error } = await supabase
+                    .from('events')
+                    .select('*')
+                    .eq('id', eventId)
+                    .single();
+
+                if (error) throw error;
+
+                document.getElementById('eventName').value = event.name;
+                document.getElementById('eventDescription').value = event.description || '';
+                document.getElementById('eventStatus').value = event.status;
+
+                openModal('eventModal');
+            } catch (error) {
+                console.error('Error loading event:', error);
+                alert('Error loading event data');
+            }
+        }
+
+        function confirmDelete(type, id) {
+            deleteTarget = { type, id };
+            document.getElementById('deleteType').textContent = type;
+            openModal('deleteModal');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
         }
 
         // ========================================
@@ -1495,9 +1563,7 @@
             if (!alert) return;
             alert.textContent = message;
             alert.className = `alert ${isError ? 'alert-error' : 'alert-success'} show`;
-            setTimeout(() => {
-                alert.classList.remove('show');
-            }, 5000);
+            setTimeout(() => alert.classList.remove('show'), 5000);
         }
 
         // ========================================
@@ -1515,62 +1581,34 @@
                 });
             });
 
-            // Auth modal
-            document.getElementById('loginBtn').querySelector('.btn-nav').addEventListener('click', () => {
-                document.getElementById('authModal').classList.add('active');
-            });
-
-            document.getElementById('closeAuthModal').addEventListener('click', () => {
-                document.getElementById('authModal').classList.remove('active');
-            });
-
-            document.getElementById('authModal').addEventListener('click', (e) => {
-                if (e.target.id === 'authModal') {
-                    document.getElementById('authModal').classList.remove('active');
-                }
-            });
+            // Auth
+            document.getElementById('loginBtn').querySelector('.btn-nav').addEventListener('click', () => openModal('authModal'));
+            document.getElementById('closeAuthModal').addEventListener('click', () => closeModal('authModal'));
+            document.getElementById('logoutBtn').addEventListener('click', signOut);
 
             // Auth tabs
             document.querySelectorAll('.auth-tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('.auth-tab-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    
                     const tab = btn.dataset.tab;
                     document.getElementById('loginTab').style.display = tab === 'login' ? 'block' : 'none';
                     document.getElementById('signupTab').style.display = tab === 'signup' ? 'block' : 'none';
                 });
             });
 
-            // Forgot password link
-            document.getElementById('forgotPasswordLink').addEventListener('click', () => {
-                document.getElementById('authModal').classList.remove('active');
-                document.getElementById('forgotPasswordModal').classList.add('active');
-            });
-
-            // Forgot password modal
-            document.getElementById('closeForgotPasswordModal').addEventListener('click', () => {
-                document.getElementById('forgotPasswordModal').classList.remove('active');
-            });
-
-            document.getElementById('forgotPasswordModal').addEventListener('click', (e) => {
-                if (e.target.id === 'forgotPasswordModal') {
-                    document.getElementById('forgotPasswordModal').classList.remove('active');
-                }
-            });
-
             // Login form
             document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                await signIn(email, password);
+                await signIn(
+                    document.getElementById('loginEmail').value,
+                    document.getElementById('loginPassword').value
+                );
             });
 
             // Signup form
             document.getElementById('signupForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const email = document.getElementById('signupEmail').value;
                 const password = document.getElementById('signupPassword').value;
                 const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
                 
@@ -1579,66 +1617,45 @@
                     return;
                 }
                 
-                await signUp(email, password);
+                await signUp(document.getElementById('signupEmail').value, password);
             });
-
-            // Forgot password form
-            document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('forgotPasswordEmail').value;
-                await resetPassword(email);
-            });
-
-            // Logout
-            document.getElementById('logoutBtn').addEventListener('click', signOut);
 
             // User avatar dropdown
             document.getElementById('userAvatar').addEventListener('click', () => {
                 document.getElementById('userDropdown').classList.toggle('show');
             });
 
-            document.addEventListener('click', (e) => {
-                const userMenu = document.getElementById('userMenu');
-                const userDropdown = document.getElementById('userDropdown');
-                if (!userMenu.contains(e.target)) {
-                    userDropdown.classList.remove('show');
-                }
-            });
-
-            // Create meet modal
-            const createMeetBtn = document.getElementById('createMeetBtn');
-            if (createMeetBtn) {
-                createMeetBtn.addEventListener('click', () => {
-                    document.getElementById('createMeetModal').classList.add('active');
-                });
-            }
-
-            document.getElementById('closeCreateMeetModal').addEventListener('click', () => {
-                document.getElementById('createMeetModal').classList.remove('active');
-            });
-
-            document.getElementById('createMeetModal').addEventListener('click', (e) => {
-                if (e.target.id === 'createMeetModal') {
-                    document.getElementById('createMeetModal').classList.remove('active');
-                }
-            });
-
-            // Create meet form
-            document.getElementById('createMeetForm').addEventListener('submit', async (e) => {
+            // Meet modal
+            document.getElementById('createMeetBtn').addEventListener('click', openCreateMeetModal);
+            document.getElementById('closeMeetModal').addEventListener('click', () => closeModal('meetModal'));
+            document.getElementById('meetForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const name = document.getElementById('meetName').value;
-                const date = document.getElementById('meetDate').value;
-                const location = document.getElementById('meetLocation').value;
-                await createMeet(name, date, location);
+                await createOrUpdateMeet(editingMeetId !== null);
             });
 
-            // Search functionality
-            document.getElementById('homeSearch').addEventListener('input', (e) => {
-                // TODO: Implement search filtering
-                console.log('Search:', e.target.value);
+            // Event modal
+            document.getElementById('addEventBtn').addEventListener('click', openCreateEventModal);
+            document.getElementById('closeEventModal').addEventListener('click', () => closeModal('eventModal'));
+            document.getElementById('eventForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await createOrUpdateEvent(editingEventId !== null);
             });
 
-            // Auth state change listener
+            // Delete modal
+            document.getElementById('closeDeleteModal').addEventListener('click', () => closeModal('deleteModal'));
+            document.getElementById('cancelDeleteBtn').addEventListener('click', () => closeModal('deleteModal'));
+            document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+                if (deleteTarget) {
+                    if (deleteTarget.type === 'meet') {
+                        await deleteMeet(deleteTarget.id);
+                    } else if (deleteTarget.type === 'event') {
+                        await deleteEvent(deleteTarget.id);
+                    }
+                    deleteTarget = null;
+                }
+            });
+
+            // Auth state changes
             supabase?.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
                     currentUser = session?.user || null;
@@ -1649,15 +1666,5 @@
                 }
             });
 
-            console.log('✅ EasyXC Live Results initialized');
+            console.log('✅ EasyXC Live initialized');
         });
-
-        // Clean up subscriptions on page unload
-        window.addEventListener('beforeunload', () => {
-            if (liveResultsSubscription) {
-                liveResultsSubscription.unsubscribe();
-            }
-        });
-    </script>
-</body>
-</html>
