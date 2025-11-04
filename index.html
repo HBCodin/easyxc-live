@@ -1062,6 +1062,17 @@
             const container = document.getElementById('publicMeetsContainer');
             container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading meets...</p></div>';
 
+            if (!supabase) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">❌</div>
+                        <h3>Database Not Connected</h3>
+                        <p>Unable to load meets at this time</p>
+                    </div>
+                `;
+                return;
+            }
+
             try {
                 const { data: meets, error } = await supabase
                     .from('meets')
@@ -1625,6 +1636,13 @@
                 document.getElementById('userDropdown').classList.toggle('show');
             });
 
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.user-menu')) {
+                    document.getElementById('userDropdown').classList.remove('show');
+                }
+            });
+
             // Meet modal
             document.getElementById('createMeetBtn').addEventListener('click', openCreateMeetModal);
             document.getElementById('closeMeetModal').addEventListener('click', () => closeModal('meetModal'));
@@ -1655,16 +1673,41 @@
                 }
             });
 
-            // Auth state changes
-            supabase?.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-                    currentUser = session?.user || null;
-                    updateAuthUI();
-                } else if (event === 'SIGNED_OUT') {
-                    currentUser = null;
-                    updateAuthUI();
-                }
+            // Close modals when clicking outside
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.remove('active');
+                    }
+                });
             });
 
-            console.log('✅ EasyXC Live initialized');
+            // Search functionality
+            document.getElementById('homeSearch').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const meetCards = document.querySelectorAll('#publicMeetsContainer .meet-card');
+                
+                meetCards.forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    card.style.display = text.includes(searchTerm) ? 'block' : 'none';
+                });
+            });
+
+            // Auth state changes
+            if (supabase) {
+                supabase.auth.onAuthStateChange((event, session) => {
+                    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+                        currentUser = session?.user || null;
+                        updateAuthUI();
+                    } else if (event === 'SIGNED_OUT') {
+                        currentUser = null;
+                        updateAuthUI();
+                    }
+                });
+            }
+
+            console.log('✅ EasyXC Live initialized successfully');
         });
+    </script>
+</body>
+</html>
