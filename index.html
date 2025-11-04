@@ -937,7 +937,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = 'https://qegdxnazhozwhqboqnzc.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlZ2R4bmF6aG96d2hxYm9xbnpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIwMDc2NjYsImV4cCI6MjA3NzU4MzY2Nn0.XeD8t-3K0LOhn6FREpdl6W8YNqa-Jxu9z-RfFetHlKI';
@@ -949,6 +949,17 @@
         let editingEventId = null;
         let deleteTarget = null;
 
+        // Initialize Supabase with error handling
+        try {
+            if (typeof window.supabase !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('✅ Supabase client initialized');
+            } else {
+                console.error('❌ Supabase library not loaded or credentials missing');
+            }
+        } catch (error) {
+            console.error('❌ Error initializing Supabase:', error);
+        }
         if (SUPABASE_URL && SUPABASE_ANON_KEY) {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
