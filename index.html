@@ -52,6 +52,12 @@
             align-items: center;
         }
 
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
         .logo {
             font-size: 1.5rem;
             font-weight: 800;
@@ -211,6 +217,35 @@
 
         .page.active {
             display: block;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid var(--light);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            opacity: 0.5;
         }
 
         .meets-grid {
@@ -603,6 +638,24 @@
             border: 2px solid #ef4444;
         }
 
+        .forgot-password-link {
+            text-align: right;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .forgot-password-link a {
+            color: var(--primary-orange);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .forgot-password-link a:hover {
+            text-decoration: underline;
+        }
+
         .btn-secondary {
             background: var(--light);
             color: var(--dark);
@@ -636,15 +689,26 @@
             .container {
                 padding: 1rem;
             }
+
+            .results-table {
+                font-size: 0.85rem;
+            }
+
+            .results-table th,
+            .results-table td {
+                padding: 0.75rem 0.5rem;
+            }
         }
     </style>
 </head>
 <body>
     <nav>
         <div class="nav-container">
-            <a class="logo" data-page="home">
-                EasyXC <span class="logo-highlight">Live</span>
-            </a>
+            <div class="logo-container">
+                <a class="logo" data-page="home">
+                    EasyXC <span class="logo-highlight">Live</span>
+                </a>
+            </div>
             <ul class="nav-links">
                 <li><a data-page="home" class="active">Home</a></li>
                 <li><a data-page="meets">My Meets</a></li>
@@ -661,7 +725,7 @@
     </nav>
 
     <main>
-        <!-- HOME PAGE -->
+        <!-- HOME PAGE - Public View -->
         <div id="home-page" class="page active">
             <div class="hero">
                 <div class="container">
@@ -670,18 +734,23 @@
                 </div>
             </div>
             <div class="container">
-                <div class="empty-state">
-                    <div class="empty-icon">🏃</div>
-                    <h3>Welcome to EasyXC Live</h3>
-                    <p>Sign in to view and manage your meet results</p>
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="homeSearch" placeholder="Search meets...">
+                </div>
+                <div id="publicMeetsContainer">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading meets...</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- MY MEETS PAGE -->
+        <!-- MY MEETS PAGE - User's Meets -->
         <div id="meets-page" class="page">
             <div class="hero">
-                <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <div>
                         <h1>My Meets</h1>
                         <p>Manage your cross country meets and live results</p>
@@ -700,7 +769,7 @@
             </div>
         </div>
 
-        <!-- MEET DETAILS PAGE -->
+        <!-- MEET DETAILS PAGE - Live Results -->
         <div id="meet-details-page" class="page">
             <div class="hero">
                 <div class="container">
@@ -745,6 +814,9 @@
                         <label>Password</label>
                         <input type="password" id="loginPassword" required>
                     </div>
+                    <div class="forgot-password-link">
+                        <a id="forgotPasswordLink">Forgot Password?</a>
+                    </div>
                     <button type="submit" class="btn-primary">Sign In</button>
                 </form>
             </div>
@@ -766,6 +838,31 @@
                     <button type="submit" class="btn-primary">Create Account</button>
                 </form>
             </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal" id="forgotPasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Reset Password</h2>
+                <button class="close-modal" id="closeForgotPasswordModal">×</button>
+            </div>
+
+            <div class="alert alert-error" id="forgotPasswordError"></div>
+            <div class="alert alert-success" id="forgotPasswordSuccess"></div>
+
+            <form id="forgotPasswordForm">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="forgotPasswordEmail" placeholder="Enter your email address" required>
+                </div>
+                <p style="color: var(--gray); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    We'll send you a link to reset your password.
+                </p>
+                <button type="submit" class="btn-primary">Send Reset Link</button>
+                <button type="button" class="btn-secondary" onclick="document.getElementById('forgotPasswordModal').classList.remove('active'); document.getElementById('authModal').classList.add('active');">Back to Sign In</button>
+            </form>
         </div>
     </div>
 
@@ -833,7 +930,9 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
             // Load page data
-            if (pageName === 'meets' && currentUser) {
+            if (pageName === 'home') {
+                loadPublicMeets();
+            } else if (pageName === 'meets' && currentUser) {
                 loadUserMeets();
             }
         }
@@ -931,8 +1030,80 @@
             }
         }
 
+        async function resetPassword(email) {
+            if (!supabase) {
+                showAlert('forgotPasswordError', 'Database not configured');
+                return;
+            }
+
+            try {
+                const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.origin
+                });
+
+                if (error) throw error;
+
+                showAlert('forgotPasswordSuccess', 'Password reset link sent! Check your email.', false);
+                setTimeout(() => {
+                    document.getElementById('forgotPasswordModal').classList.remove('active');
+                    document.getElementById('forgotPasswordForm').reset();
+                }, 3000);
+            } catch (error) {
+                showAlert('forgotPasswordError', error.message);
+            }
+        }
+
         // ========================================
-        // MEETS MANAGEMENT
+        // PUBLIC MEETS (Home Page - Everyone)
+        // ========================================
+        async function loadPublicMeets() {
+            const container = document.getElementById('publicMeetsContainer');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading meets...</p></div>';
+
+            try {
+                const { data: meets, error } = await supabase
+                    .from('meets')
+                    .select('*')
+                    .order('date', { ascending: false });
+
+                if (error) throw error;
+
+                if (meets && meets.length > 0) {
+                    displayPublicMeets(meets);
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">🏁</div>
+                            <h3>No Meets Yet</h3>
+                            <p>Check back soon for upcoming meets</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading public meets:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">❌</div>
+                        <h3>Error Loading Meets</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayPublicMeets(meets) {
+            const container = document.getElementById('publicMeetsContainer');
+            container.innerHTML = '<div class="meets-grid"></div>';
+            const grid = container.querySelector('.meets-grid');
+
+            meets.forEach(meet => {
+                const card = createMeetCard(meet, false); // false = not editable
+                grid.appendChild(card);
+            });
+        }
+
+        // ========================================
+        // USER MEETS (My Meets Page)
         // ========================================
         async function loadUserMeets() {
             const container = document.getElementById('meetsContainer');
@@ -960,7 +1131,7 @@
                 if (error) throw error;
 
                 if (meets && meets.length > 0) {
-                    displayMeets(meets);
+                    displayUserMeets(meets);
                 } else {
                     container.innerHTML = `
                         <div class="empty-state">
@@ -983,18 +1154,18 @@
             }
         }
 
-        function displayMeets(meets) {
+        function displayUserMeets(meets) {
             const container = document.getElementById('meetsContainer');
             container.innerHTML = '<div class="meets-grid"></div>';
             const grid = container.querySelector('.meets-grid');
 
             meets.forEach(meet => {
-                const card = createMeetCard(meet);
+                const card = createMeetCard(meet, true); // true = editable
                 grid.appendChild(card);
             });
         }
 
-        function createMeetCard(meet) {
+        function createMeetCard(meet, isOwner) {
             const card = document.createElement('div');
             card.className = 'meet-card';
             card.onclick = () => loadMeetDetails(meet.id);
@@ -1012,6 +1183,7 @@
                 </div>
                 <div class="meet-date">📅 ${formattedDate}</div>
                 <div class="meet-location">📍 ${meet.location}</div>
+                ${isOwner ? '<span class="badge badge-live">Your Meet</span>' : ''}
             `;
 
             return card;
@@ -1333,6 +1505,7 @@
         // ========================================
         document.addEventListener('DOMContentLoaded', async () => {
             await checkAuth();
+            await loadPublicMeets();
 
             // Navigation
             document.querySelectorAll('[data-page]').forEach(link => {
@@ -1369,6 +1542,23 @@
                 });
             });
 
+            // Forgot password link
+            document.getElementById('forgotPasswordLink').addEventListener('click', () => {
+                document.getElementById('authModal').classList.remove('active');
+                document.getElementById('forgotPasswordModal').classList.add('active');
+            });
+
+            // Forgot password modal
+            document.getElementById('closeForgotPasswordModal').addEventListener('click', () => {
+                document.getElementById('forgotPasswordModal').classList.remove('active');
+            });
+
+            document.getElementById('forgotPasswordModal').addEventListener('click', (e) => {
+                if (e.target.id === 'forgotPasswordModal') {
+                    document.getElementById('forgotPasswordModal').classList.remove('active');
+                }
+            });
+
             // Login form
             document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -1390,6 +1580,13 @@
                 }
                 
                 await signUp(email, password);
+            });
+
+            // Forgot password form
+            document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('forgotPasswordEmail').value;
+                await resetPassword(email);
             });
 
             // Logout
@@ -1433,6 +1630,12 @@
                 const date = document.getElementById('meetDate').value;
                 const location = document.getElementById('meetLocation').value;
                 await createMeet(name, date, location);
+            });
+
+            // Search functionality
+            document.getElementById('homeSearch').addEventListener('input', (e) => {
+                // TODO: Implement search filtering
+                console.log('Search:', e.target.value);
             });
 
             // Auth state change listener
