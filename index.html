@@ -2083,6 +2083,17 @@
             }
 
             console.log('✅ EasyXC Live initialized successfully');
+            setInterval(() => {
+        const isEventsPageActive = document
+        .getElementById('meet-details-page')
+        .classList.contains('active');
+
+        if (isEventsPageActive && currentMeetId) {
+        console.log("🔄 Auto-refreshing events...");
+        loadMeetEvents(currentMeetId);
+    }
+}, 1000);
+            
         });
     </script>
 </body>
