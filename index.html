@@ -1167,58 +1167,6 @@
 }
 
       // Cache last event list
-let lastEventMap = new Map();
-
-async function silentRefreshMeetEvents(meetId) {
-    const { data: events, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('meet_id', meetId)
-        .order('created_at', { ascending: true });
-
-    if (error) return;
-
-    const container = document.getElementById('meetEventsContainer');
-    const list = container.querySelector('.event-list');
-
-    if (!list) return; // safety
-
-    // Convert array to map for easy comparison
-    const newEventMap = new Map(events.map(e => [e.id, e]));
-
-    // 🔥 1. REMOVE deleted events
-    lastEventMap.forEach((oldEvent, id) => {
-        if (!newEventMap.has(id)) {
-            const el = list.querySelector(`[data-event-id="${id}"]`);
-            if (el) el.remove();
-        }
-    });
-
-    // 🔥 2. ADD or UPDATE events
-    newEventMap.forEach((event, id) => {
-        const existing = list.querySelector(`[data-event-id="${id}"]`);
-
-        if (!existing) {
-            // Add new event
-            const item = createEventItem(event, isMeetOwner(meetId));
-            item.setAttribute("data-event-id", id);
-            list.appendChild(item);
-
-            // Load results silently
-            loadEventResults(event.id, isMeetOwner(meetId), true);
-        } else {
-            // Update only if changed (name, type, status)
-            const title = existing.querySelector(".event-title");
-            if (title && title.textContent !== event.name) {
-                title.textContent = event.name;
-            }
-        }
-    });
-
-    // Save new state
-    lastEventMap = newEventMap;
-}
-
 
         async function signIn(email, password) {
             if (!supabase) {
@@ -1727,14 +1675,11 @@ async function silentRefreshMeetEvents(meetId) {
         // ========================================
         // RESULTS - CRUD & REAL-TIME
         // ========================================
-       async function loadEventResults(eventId, showDeleteButtons = false) {
-    const container = document.getElementById(`results-${eventId}`);
-    if (!container) {
-        console.log("❌ Container not found for eventId:", eventId);
-        return;
-    }
+     const lastResultsMap = new Map();
 
-    console.log("🔍 Loading results for event:", eventId);
+async function loadEventResults(eventId, showDeleteButtons = false) {
+    const container = document.getElementById(`results-${eventId}`);
+    if (!container) return;
 
     try {
         const { data: results, error } = await supabase
@@ -1743,28 +1688,81 @@ async function silentRefreshMeetEvents(meetId) {
             .eq('event_id', eventId)
             .order('place', { ascending: true });
 
-        console.log("📥 RAW RESULTS:", results);
-        console.log("⚠️ RAW ERROR:", error);
+        if (error) return;
 
-        if (error) {
-            container.innerHTML = `<p style="color:red;">ERROR: ${error.message}</p>`;
-            return;
-        }
-
-        if (!results || results.length === 0) {
-            container.innerHTML = `<p>No results yet</p>`;
-            return;
-        }
-
-        // Render normally
-        displayResults(results, container, eventId, showDeleteButtons);
+        silentUpdateResultsTable(container, results, eventId, showDeleteButtons);
 
     } catch (err) {
-        console.error("💥 CRASH:", err);
-        container.innerHTML = `<p style="color:red;">CRITICAL JS ERROR: ${err.message}</p>`;
+        console.error(err);
     }
 }
 
+function silentUpdateResultsTable(container, results, eventId, showDeleteButtons) {
+    // Create table if it doesn't exist
+    let table = container.querySelector("table");
+    if (!table) {
+        table = document.createElement("table");
+        table.className = "results-table";
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Place</th>
+                    <th>Name</th>
+                    <th>Bib</th>
+                    <th>Time</th>
+                    ${showDeleteButtons ? "<th>Actions</th>" : ""}
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+        container.innerHTML = "";
+        container.appendChild(table);
+    }
+
+    const tbody = table.querySelector("tbody");
+
+    // Convert new results into a map
+    const newMap = new Map(results.map(r => [r.id, r]));
+
+    // --- REMOVE DELETED ROWS ---
+    Array.from(tbody.children).forEach(row => {
+        const id = row.dataset.resultId;
+        if (!newMap.has(id)) {
+            row.remove();
+        }
+    });
+
+    // --- INSERT / UPDATE ROWS ---
+    newMap.forEach(result => {
+        let row = tbody.querySelector(`[data-result-id="${result.id}"]`);
+
+        if (!row) {
+            // Add new row
+            row = document.createElement("tr");
+            row.dataset.resultId = result.id;
+            tbody.appendChild(row);
+        }
+
+        // Update row contents silently
+        row.innerHTML = `
+            <td>
+                <span class="place-badge ${getPlaceBadgeClass(result.place)}">
+                    ${result.place}
+                </span>
+            </td>
+            <td>${result.runner_name}</td>
+            <td>#${result.bib_number}</td>
+            <td><strong>${result.finish_time}</strong></td>
+            ${showDeleteButtons ? `
+                <td>
+                    <button class="btn-icon danger" onclick="confirmDelete('result','${result.id}')">🗑</button>
+                </td>
+            ` : ""}
+        `;
+    });
+
+    lastResultsMap.set(eventId, newMap);
+}
 
        function displayResults(results, container, eventId, showDeleteButtons) {
     if (!results || results.length === 0) {
