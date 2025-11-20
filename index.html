@@ -1531,6 +1531,9 @@
             events.forEach(event => {
                 const eventItem = createEventItem(event, showActions);
                 eventList.appendChild(eventItem);
+                setTimeout(() => {
+            loadEventResults(event.id, showActions);
+        }, 10);
             });
         }
 
@@ -1568,7 +1571,7 @@
             `;
 
             // Load results for this event
-            loadEventResults(event.id, showActions);
+            
 
             return item;
         }
