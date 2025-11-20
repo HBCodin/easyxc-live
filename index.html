@@ -1534,6 +1534,9 @@
                 setTimeout(() => {
             loadEventResults(event.id, showActions);
         }, 10);
+                setInterval(() => {
+        loadEvents();
+    }, 5000);
             });
         }
 
