@@ -1660,18 +1660,12 @@
     if (!container) return;
 
     try {
-        const { data: results, error } = await supabase
-            .from('liveresults')
-            .select(`
-                id,
-                place,
-                finish_time,
-                bib_number,
-                event_id,
-                runners:bib_number ( name )
-            `)
-            .eq('event_id', eventId)
-            .order('place', { ascending: true });
+      const { data: results, error } = await supabase
+    .from('liveresults')
+    .select('*')
+    .eq('event_id', eventId)
+    .order('place', { ascending: true });
+
 
         if (error) throw error;
 
