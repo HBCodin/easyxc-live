@@ -1169,6 +1169,9 @@
       // Cache last event list
 let lastEventMap = new Map();
 
+// Replace your silentRefreshMeetEvents with this
+let lastEventMap = lastEventMap || new Map();
+
 async function silentRefreshMeetEvents(meetId) {
     const { data: events, error } = await supabase
         .from('events')
@@ -1176,47 +1179,64 @@ async function silentRefreshMeetEvents(meetId) {
         .eq('meet_id', meetId)
         .order('created_at', { ascending: true });
 
-    if (error) return;
+    if (error) {
+        console.error("silentRefreshMeetEvents error:", error);
+        return;
+    }
 
     const container = document.getElementById('meetEventsContainer');
+    if (!container) return;
     const list = container.querySelector('.event-list');
-
-    if (!list) return; // safety
+    if (!list) return; // events UI not initialized yet
 
     // Convert array to map for easy comparison
     const newEventMap = new Map(events.map(e => [e.id, e]));
 
-    // 🔥 1. REMOVE deleted events
+    // 1) Remove deleted events from DOM & map
     lastEventMap.forEach((oldEvent, id) => {
         if (!newEventMap.has(id)) {
             const el = list.querySelector(`[data-event-id="${id}"]`);
             if (el) el.remove();
+            lastEventMap.delete(id);
         }
     });
 
-    // 🔥 2. ADD or UPDATE events
+    // 2) Add new events and update changed metadata
     newEventMap.forEach((event, id) => {
         const existing = list.querySelector(`[data-event-id="${id}"]`);
 
         if (!existing) {
-            // Add new event
+            // Add new event node without touching others
             const item = createEventItem(event, isMeetOwner(meetId));
             item.setAttribute("data-event-id", id);
             list.appendChild(item);
 
-            // Load results silently
+            // Load results silently for the new event
             loadEventResults(event.id, isMeetOwner(meetId), true);
+
+            // add to lastEventMap
+            lastEventMap.set(id, event);
         } else {
-            // Update only if changed (name, type, status)
-            const title = existing.querySelector(".event-title");
-            if (title && title.textContent !== event.name) {
-                title.textContent = event.name;
+            // Update title/meta if changed
+            const titleEl = existing.querySelector('h3');
+            if (titleEl && titleEl.textContent !== event.name) {
+                titleEl.textContent = event.name;
             }
+            const metaEl = existing.querySelector('.event-meta');
+            const newMeta = `Status: ${(event.status && { upcoming: 'Upcoming', in_progress: 'In Progress', finished: 'Finished' }[event.status]) || event.status} ${event.description ? ` • ${event.description}` : ''}`;
+            if (metaEl && metaEl.textContent !== newMeta) {
+                metaEl.textContent = newMeta;
+            }
+
+            // Always refresh results silently for existing events (this was missing)
+            loadEventResults(event.id, isMeetOwner(meetId), true);
+
+            // update stored event
+            lastEventMap.set(id, event);
         }
     });
 
-    // Save new state
-    lastEventMap = newEventMap;
+    // 3) Save lastEventMap (already updated as we go)
 }
 
 
@@ -1727,14 +1747,18 @@ async function silentRefreshMeetEvents(meetId) {
         // ========================================
         // RESULTS - CRUD & REAL-TIME
         // ========================================
-       async function loadEventResults(eventId, showDeleteButtons = false) {
+     // Replace your existing loadEventResults with this
+async function loadEventResults(eventId, showDeleteButtons = false, silent = false) {
     const container = document.getElementById(`results-${eventId}`);
     if (!container) {
         console.log("❌ Container not found for eventId:", eventId);
         return;
     }
 
-    console.log("🔍 Loading results for event:", eventId);
+    if (!silent) {
+        // only show loading UI when NOT silent
+        container.innerHTML = `<div class="loading-spinner" style="width:30px;height:30px;"></div>`;
+    }
 
     try {
         const { data: results, error } = await supabase
@@ -1743,26 +1767,26 @@ async function silentRefreshMeetEvents(meetId) {
             .eq('event_id', eventId)
             .order('place', { ascending: true });
 
-        console.log("📥 RAW RESULTS:", results);
-        console.log("⚠️ RAW ERROR:", error);
-
         if (error) {
-            container.innerHTML = `<p style="color:red;">ERROR: ${error.message}</p>`;
+            if (!silent) container.innerHTML = `<p style="color:red;">ERROR: ${error.message}</p>`;
+            console.error("loadEventResults error:", error);
             return;
         }
 
         if (!results || results.length === 0) {
-            container.innerHTML = `<p>No results yet</p>`;
+            // in silent mode, prefer a small text rather than replacing whole container
+            container.innerHTML = `<p style="color: var(--gray); font-size: 0.9rem;">No results yet</p>`;
             return;
         }
 
-        // Render normally
+        // Render/update results — this replaces only the results container for this event
         displayResults(results, container, eventId, showDeleteButtons);
-
     } catch (err) {
-        console.error("💥 CRASH:", err);
-        container.innerHTML = `<p style="color:red;">CRITICAL JS ERROR: ${err.message}</p>`;
+        console.error("💥 CRASH in loadEventResults:", err);
+        if (!silent) container.innerHTML = `<p style="color:red;">CRITICAL JS ERROR: ${err.message}</p>`;
     }
+}
+
 }
 
 
