@@ -1655,36 +1655,41 @@
         // ========================================
         // RESULTS - CRUD & REAL-TIME
         // ========================================
-        async function loadEventResults(eventId, showDeleteButtons = false) {
+       async function loadEventResults(eventId, showDeleteButtons = false) {
     const container = document.getElementById(`results-${eventId}`);
-    if (!container) return;
+    if (!container) {
+        console.log("❌ Container not found for eventId:", eventId);
+        return;
+    }
+
+    console.log("🔍 Loading results for event:", eventId);
 
     try {
-      const { data: results, error } = await supabase
-    .from('liveresults')
-    .select('*')
-    .eq('event_id', eventId)
-    .order('place', { ascending: true });
+        const { data: results, error } = await supabase
+            .from('liveresults')
+            .select('*')
+            .eq('event_id', eventId)
+            .order('place', { ascending: true });
 
+        console.log("📥 RAW RESULTS:", results);
+        console.log("⚠️ RAW ERROR:", error);
 
+        if (error) {
+            container.innerHTML = `<p style="color:red;">ERROR: ${error.message}</p>`;
+            return;
+        }
 
-        if (error) throw error;
-        console.log("RESULTS:", results, "ERROR:", error);
+        if (!results || results.length === 0) {
+            container.innerHTML = `<p>No results yet</p>`;
+            return;
+        }
 
-        // Normalize name field
-        const normalized = results.map(r => ({
-            ...r,
-            runner_name: r.runners?.name || "Unknown Runner"
-        }));
+        // Render normally
+        displayResults(results, container, eventId, showDeleteButtons);
 
-        displayResults(normalized, container, eventId, showDeleteButtons);
-
-        // Real-time listener
-        setupRealtimeSubscription(eventId, showDeleteButtons);
-
-    } catch (error) {
-        console.error('Error loading results:', error);
-        container.innerHTML = `<p style="color: var(--gray); font-size: 0.9rem;">No results yet</p>`;
+    } catch (err) {
+        console.error("💥 CRASH:", err);
+        container.innerHTML = `<p style="color:red;">CRITICAL JS ERROR: ${err.message}</p>`;
     }
 }
 
