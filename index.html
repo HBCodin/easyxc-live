@@ -1655,7 +1655,7 @@
         // ========================================
         // RESULTS - CRUD & REAL-TIME
         // ========================================
-        aasync function loadEventResults(eventId, showDeleteButtons = false) {
+        async function loadEventResults(eventId, showDeleteButtons = false) {
     const container = document.getElementById(`results-${eventId}`);
     if (!container) return;
 
