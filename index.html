@@ -2150,13 +2150,14 @@ function silentUpdateResultsTable(container, results, eventId, showDeleteButtons
             }
 
             console.log('✅ EasyXC Live initialized successfully');
-           // 🔄 Silent auto-refresh events list every 5 seconds
-setInterval(() => {
-    const active = document.getElementById('meet-details-page').classList.contains('active');
+         setInterval(() => {
+    const active = document.getElementById('meet-details-page')?.classList.contains('active');
+
     if (active && currentMeetId) {
-       silentUpdateResultsTable(container, results, eventId, showDeleteButtons)
+        loadEventResults(currentEventId, true);
     }
-}, 3000); 
+}, 3000);
+
 
 
             
