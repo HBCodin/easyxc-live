@@ -2,8 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EasyXC Live - Real-time cross country race results">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏃</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏃</text></svg>">
+    
     <title>EasyXC Live Results</title>
     <style>
         * {
@@ -213,6 +218,14 @@
             opacity: 0.85;
         }
 
+        .hero-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
         .page {
             display: none;
         }
@@ -385,15 +398,19 @@
             border-radius: 12px;
             padding: 1.5rem;
             border-left: 4px solid var(--primary-orange);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             transition: all 0.3s ease;
         }
 
         .event-item:hover {
             background: #FAFAFA;
             transform: translateX(4px);
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
         }
 
         .event-info h3 {
@@ -410,6 +427,86 @@
         .event-actions {
             display: flex;
             gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-small {
+            background: var(--primary-orange);
+            color: white;
+        }
+
+        .btn-primary-small:hover {
+            background: var(--orange-dark);
+        }
+
+        .results-container {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #E0E0E0;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+
+        .results-table th {
+            background: var(--dark);
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .results-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--light);
+        }
+
+        .results-table tr:hover {
+            background: #FAFAFA;
+        }
+
+        .place-badge {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .place-1 {
+            background: #FFD700;
+            color: #1A1A1A;
+        }
+
+        .place-2 {
+            background: #C0C0C0;
+            color: #1A1A1A;
+        }
+
+        .place-3 {
+            background: #CD7F32;
+            color: white;
+        }
+
+        .place-other {
+            background: var(--light);
+            color: var(--dark);
         }
 
         .loading {
@@ -712,6 +809,15 @@
             .container {
                 padding: 1rem;
             }
+
+            .results-table {
+                font-size: 0.85rem;
+            }
+
+            .results-table th,
+            .results-table td {
+                padding: 0.5rem;
+            }
         }
     </style>
 </head>
@@ -764,7 +870,7 @@
         <!-- MY MEETS PAGE -->
         <div id="meets-page" class="page">
             <div class="hero">
-                <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div class="container hero-actions">
                     <div>
                         <h1>My Meets</h1>
                         <p>Manage your cross country meets and events</p>
@@ -786,7 +892,7 @@
         <!-- MEET DETAILS PAGE -->
         <div id="meet-details-page" class="page">
             <div class="hero">
-                <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div class="container hero-actions">
                     <div>
                         <h1 id="meetDetailsTitle">Meet Details</h1>
                         <p id="meetDetailsSubtitle">Manage events and view results</p>
@@ -918,7 +1024,46 @@
                         <option value="finished">Finished</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="eventScoreable" style="width: auto; margin-right: 0.5rem;">
+                        Enable Scoring
+                    </label>
+                    <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.25rem;">
+                        Allow results to be entered for this event
+                    </p>
+                </div>
                 <button type="submit" class="btn-primary" id="eventSubmitBtn">Add Event</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Result Modal -->
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Result</h2>
+                <button class="close-modal" id="closeResultModal">×</button>
+            </div>
+            <div class="alert alert-error" id="resultError"></div>
+            <div class="alert alert-success" id="resultSuccess"></div>
+            <form id="resultForm">
+                <div class="form-group">
+                    <label>Bib Number *</label>
+                    <input type="number" id="resultBib" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Finish Time (MM:SS.ms) *</label>
+                    <input type="text" id="resultTime" placeholder="e.g., 15:24.3" required pattern="^\d{1,2}:\d{2}(\.\d{1,2})?$">
+                    <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.25rem;">
+                        Format: minutes:seconds.milliseconds
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label>Place *</label>
+                    <input type="number" id="resultPlace" min="1" required>
+                </div>
+                <button type="submit" class="btn-primary">Add Result</button>
             </form>
         </div>
     </div>
@@ -938,7 +1083,7 @@
         </div>
     </div>
 
-     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = 'https://qegdxnazhozwhqboqnzc.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlZ2R4bmF6aG96d2hxYm9xbnpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIwMDc2NjYsImV4cCI6MjA3NzU4MzY2Nn0.XeD8t-3K0LOhn6FREpdl6W8YNqa-Jxu9z-RfFetHlKI';
@@ -946,11 +1091,13 @@
         let supabase = null;
         let currentUser = null;
         let currentMeetId = null;
+        let currentEventId = null;
         let editingMeetId = null;
         let editingEventId = null;
         let deleteTarget = null;
+        let resultsSubscription = null;
 
-        // Initialize Supabase with error handling
+        // Initialize Supabase
         try {
             if (typeof window.supabase !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY) {
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -960,9 +1107,6 @@
             }
         } catch (error) {
             console.error('❌ Error initializing Supabase:', error);
-        }
-        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
         // ========================================
@@ -1058,6 +1202,12 @@
         async function signOut() {
             if (!supabase) return;
             try {
+                // Unsubscribe from realtime if active
+                if (resultsSubscription) {
+                    resultsSubscription.unsubscribe();
+                    resultsSubscription = null;
+                }
+                
                 await supabase.auth.signOut();
                 currentUser = null;
                 updateAuthUI();
@@ -1241,7 +1391,6 @@
                         .from('meets')
                         .update(meetData)
                         .eq('id', editingMeetId)
-                        .eq('created_by', currentUser.id)
                         .select()
                         .single();
                     
@@ -1277,8 +1426,7 @@
                 const { error } = await supabase
                     .from('meets')
                     .delete()
-                    .eq('id', meetId)
-                    .eq('created_by', currentUser.id);
+                    .eq('id', meetId);
 
                 if (error) throw error;
 
@@ -1389,6 +1537,7 @@
         function createEventItem(event, showActions) {
             const item = document.createElement('div');
             item.className = 'event-item';
+            item.dataset.eventId = event.id;
 
             const statusLabels = {
                 upcoming: 'Upcoming',
@@ -1397,20 +1546,29 @@
             };
 
             item.innerHTML = `
-                <div class="event-info">
-                    <h3>${event.name}</h3>
-                    <div class="event-meta">
-                        Status: ${statusLabels[event.status] || event.status}
-                        ${event.description ? ` • ${event.description}` : ''}
+                <div class="event-header">
+                    <div class="event-info">
+                        <h3>${event.name}</h3>
+                        <div class="event-meta">
+                            Status: ${statusLabels[event.status] || event.status}
+                            ${event.description ? ` • ${event.description}` : ''}
+                        </div>
+                    </div>
+                    <div class="event-actions">
+                        ${event.scoreable && showActions ? `<button class="btn-small btn-primary-small" onclick="openAddResultModal('${event.id}')">+ Add Result</button>` : ''}
+                        ${showActions ? `
+                            <button class="btn-icon" onclick="openEditEventModal('${event.id}')" title="Edit Event">✏️</button>
+                            <button class="btn-icon danger" onclick="confirmDelete('event', '${event.id}')" title="Delete Event">🗑️</button>
+                        ` : ''}
                     </div>
                 </div>
-                ${showActions ? `
-                    <div class="event-actions">
-                        <button class="btn-icon" onclick="openEditEventModal('${event.id}')" title="Edit Event">✏️</button>
-                        <button class="btn-icon danger" onclick="confirmDelete('event', '${event.id}')" title="Delete Event">🗑️</button>
-                    </div>
-                ` : ''}
+                <div class="results-container" id="results-${event.id}">
+                    <div class="loading-spinner" style="width: 30px; height: 30px;"></div>
+                </div>
             `;
+
+            // Load results for this event
+            loadEventResults(event.id, showActions);
 
             return item;
         }
@@ -1424,6 +1582,7 @@
             const name = document.getElementById('eventName').value.trim();
             const description = document.getElementById('eventDescription').value.trim();
             const status = document.getElementById('eventStatus').value;
+            const scoreable = document.getElementById('eventScoreable').checked;
 
             if (!name) {
                 showAlert('eventError', 'Please enter an event name');
@@ -1436,6 +1595,7 @@
                     name,
                     description,
                     status,
+                    scoreable,
                     created_by: currentUser.id
                 };
 
@@ -1445,7 +1605,6 @@
                         .from('events')
                         .update(eventData)
                         .eq('id', editingEventId)
-                        .eq('created_by', currentUser.id)
                         .select()
                         .single();
                     
@@ -1481,8 +1640,7 @@
                 const { error } = await supabase
                     .from('events')
                     .delete()
-                    .eq('id', eventId)
-                    .eq('created_by', currentUser.id);
+                    .eq('id', eventId);
 
                 if (error) throw error;
 
@@ -1491,6 +1649,174 @@
             } catch (error) {
                 console.error('Error deleting event:', error);
                 alert('Error deleting event: ' + error.message);
+            }
+        }
+
+        // ========================================
+        // RESULTS - CRUD & REAL-TIME
+        // ========================================
+        async function loadEventResults(eventId, showDeleteButtons = false) {
+            const container = document.getElementById(`results-${eventId}`);
+            if (!container) return;
+
+            try {
+                const { data: results, error } = await supabase
+                    .from('liveresults')
+                    .select('*')
+                    .eq('event_id', eventId)
+                    .order('place', { ascending: true });
+
+                if (error) throw error;
+
+                displayResults(results, container, eventId, showDeleteButtons);
+
+                // Set up real-time subscription for this event
+                setupRealtimeSubscription(eventId, showDeleteButtons);
+
+            } catch (error) {
+                console.error('Error loading results:', error);
+                container.innerHTML = `<p style="color: var(--gray); font-size: 0.9rem;">No results yet</p>`;
+            }
+        }
+
+        function displayResults(results, container, eventId, showDeleteButtons) {
+            if (!results || results.length === 0) {
+                container.innerHTML = `<p style="color: var(--gray); font-size: 0.9rem;">No results yet</p>`;
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.className = 'results-table';
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Place</th>
+                        <th>Bib</th>
+                        <th>Time</th>
+                        ${showDeleteButtons ? '<th>Actions</th>' : ''}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${results.map(result => `
+                        <tr>
+                            <td>
+                                <span class="place-badge ${getPlaceBadgeClass(result.place)}">
+                                    ${result.place}
+                                </span>
+                            </td>
+                            <td>#${result.bib_number}</td>
+                            <td><strong>${result.finish_time}</strong></td>
+                            ${showDeleteButtons ? `
+                                <td>
+                                    <button class="btn-icon danger" onclick="confirmDelete('result', '${result.id}')" title="Delete Result">🗑️</button>
+                                </td>
+                            ` : ''}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+
+            container.innerHTML = '';
+            container.appendChild(table);
+        }
+
+        function getPlaceBadgeClass(place) {
+            if (place === 1) return 'place-1';
+            if (place === 2) return 'place-2';
+            if (place === 3) return 'place-3';
+            return 'place-other';
+        }
+
+        function setupRealtimeSubscription(eventId, showDeleteButtons) {
+            // Unsubscribe from previous subscription if exists
+            if (resultsSubscription) {
+                resultsSubscription.unsubscribe();
+            }
+
+            // Subscribe to changes on the liveresults table for this event
+            resultsSubscription = supabase
+                .channel(`results-${eventId}`)
+                .on('postgres_changes', 
+                    { 
+                        event: '*', 
+                        schema: 'public', 
+                        table: 'liveresults',
+                        filter: `event_id=eq.${eventId}`
+                    }, 
+                    (payload) => {
+                        console.log('Real-time update:', payload);
+                        // Reload results when any change occurs
+                        loadEventResults(eventId, showDeleteButtons);
+                    }
+                )
+                .subscribe();
+        }
+
+        async function addResult() {
+            if (!supabase || !currentUser || !currentEventId) {
+                showAlert('resultError', 'Invalid request');
+                return;
+            }
+
+            const bib = parseInt(document.getElementById('resultBib').value);
+            const time = document.getElementById('resultTime').value.trim();
+            const place = parseInt(document.getElementById('resultPlace').value);
+
+            if (!bib || !time || !place) {
+                showAlert('resultError', 'Please fill in all fields');
+                return;
+            }
+
+            // Validate time format (MM:SS.ms)
+            const timePattern = /^\d{1,2}:\d{2}(\.\d{1,2})?$/;
+            if (!timePattern.test(time)) {
+                showAlert('resultError', 'Invalid time format. Use MM:SS or MM:SS.ms');
+                return;
+            }
+
+            try {
+                const resultData = {
+                    event_id: currentEventId,
+                    bib_number: bib,
+                    finish_time: time,
+                    place: place,
+                    user_id: currentUser.id
+                };
+
+                const { data, error } = await supabase
+                    .from('liveresults')
+                    .insert([resultData])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                showAlert('resultSuccess', 'Result added successfully!', false);
+                setTimeout(() => {
+                    closeModal('resultModal');
+                    document.getElementById('resultForm').reset();
+                }, 1000);
+            } catch (error) {
+                console.error('Error adding result:', error);
+                showAlert('resultError', error.message);
+            }
+        }
+
+        async function deleteResult(resultId) {
+            if (!supabase || !currentUser) return;
+
+            try {
+                const { error } = await supabase
+                    .from('liveresults')
+                    .delete()
+                    .eq('id', resultId);
+
+                if (error) throw error;
+
+                closeModal('deleteModal');
+            } catch (error) {
+                console.error('Error deleting result:', error);
+                alert('Error deleting result: ' + error.message);
             }
         }
 
@@ -1556,12 +1882,19 @@
                 document.getElementById('eventName').value = event.name;
                 document.getElementById('eventDescription').value = event.description || '';
                 document.getElementById('eventStatus').value = event.status;
+                document.getElementById('eventScoreable').checked = event.scoreable || false;
 
                 openModal('eventModal');
             } catch (error) {
                 console.error('Error loading event:', error);
                 alert('Error loading event data');
             }
+        }
+
+        function openAddResultModal(eventId) {
+            currentEventId = eventId;
+            document.getElementById('resultForm').reset();
+            openModal('resultModal');
         }
 
         function confirmDelete(type, id) {
@@ -1671,6 +2004,13 @@
                 await createOrUpdateEvent(editingEventId !== null);
             });
 
+            // Result modal
+            document.getElementById('closeResultModal').addEventListener('click', () => closeModal('resultModal'));
+            document.getElementById('resultForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await addResult();
+            });
+
             // Delete modal
             document.getElementById('closeDeleteModal').addEventListener('click', () => closeModal('deleteModal'));
             document.getElementById('cancelDeleteBtn').addEventListener('click', () => closeModal('deleteModal'));
@@ -1680,6 +2020,8 @@
                         await deleteMeet(deleteTarget.id);
                     } else if (deleteTarget.type === 'event') {
                         await deleteEvent(deleteTarget.id);
+                    } else if (deleteTarget.type === 'result') {
+                        await deleteResult(deleteTarget.id);
                     }
                     deleteTarget = null;
                 }
@@ -1721,6 +2063,5 @@
             console.log('✅ EasyXC Live initialized successfully');
         });
     </script>
- 
 </body>
 </html>
