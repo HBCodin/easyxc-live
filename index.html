@@ -1161,6 +1161,34 @@
                 console.error('Error checking auth:', error);
             }
         }
+        
+        async function silentRefreshMeetEvents(meetId) {
+    try {
+        const { data: events, error } = await supabase
+            .from('events')
+            .select('*')
+            .eq('meet_id', meetId)
+            .order('created_at', { ascending: true });
+
+        if (error) return;
+
+        const container = document.getElementById('meetEventsContainer');
+
+        // Owner check
+        const { data: meet } = await supabase
+            .from('meets')
+            .select('created_by')
+            .eq('id', meetId)
+            .single();
+
+        const isOwner = currentUser && meet && meet.created_by === currentUser.id;
+
+        // Rebuild events WITHOUT showing a loading spinner
+        displayEvents(events, container, isOwner);
+    } catch (err) {
+        console.error("Silent refresh error:", err);
+    }
+}
 
         async function signIn(email, password) {
             if (!supabase) {
@@ -2083,16 +2111,17 @@
             }
 
             console.log('✅ EasyXC Live initialized successfully');
-            setInterval(() => {
-        const isEventsPageActive = document
+           // 🔄 Silent auto-refresh events list every 5 seconds
+setInterval(() => {
+    const isActive = document
         .getElementById('meet-details-page')
         .classList.contains('active');
 
-        if (isEventsPageActive && currentMeetId) {
-        console.log("🔄 Auto-refreshing events...");
-        loadMeetEvents(currentMeetId);
+    if (isActive && currentMeetId) {
+        silentRefreshMeetEvents(currentMeetId);
     }
 }, 1000);
+
             
         });
     </script>
