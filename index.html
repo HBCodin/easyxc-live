@@ -1667,7 +1667,9 @@
     .order('place', { ascending: true });
 
 
+
         if (error) throw error;
+        console.log("RESULTS:", results, "ERROR:", error);
 
         // Normalize name field
         const normalized = results.map(r => ({
