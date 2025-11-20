@@ -1655,77 +1655,95 @@
         // ========================================
         // RESULTS - CRUD & REAL-TIME
         // ========================================
-        async function loadEventResults(eventId, showDeleteButtons = false) {
-            const container = document.getElementById(`results-${eventId}`);
-            if (!container) return;
+        aasync function loadEventResults(eventId, showDeleteButtons = false) {
+    const container = document.getElementById(`results-${eventId}`);
+    if (!container) return;
 
-            try {
-                const { data: results, error } = await supabase
-                    .from('liveresults')
-                    .select('*')
-                    .eq('event_id', eventId)
-                    .order('place', { ascending: true });
+    try {
+        const { data: results, error } = await supabase
+            .from('liveresults')
+            .select(`
+                id,
+                place,
+                finish_time,
+                bib_number,
+                event_id,
+                runners:bib_number ( name )
+            `)
+            .eq('event_id', eventId)
+            .order('place', { ascending: true });
 
-                if (error) throw error;
+        if (error) throw error;
 
-                displayResults(results, container, eventId, showDeleteButtons);
+        // Normalize name field
+        const normalized = results.map(r => ({
+            ...r,
+            runner_name: r.runners?.name || "Unknown Runner"
+        }));
 
-                // Set up real-time subscription for this event
-                setupRealtimeSubscription(eventId, showDeleteButtons);
+        displayResults(normalized, container, eventId, showDeleteButtons);
 
-            } catch (error) {
-                console.error('Error loading results:', error);
-                container.innerHTML = `<p style="color: var(--gray); font-size: 0.9rem;">No results yet</p>`;
-            }
-        }
+        // Real-time listener
+        setupRealtimeSubscription(eventId, showDeleteButtons);
 
-        function displayResults(results, container, eventId, showDeleteButtons) {
-            if (!results || results.length === 0) {
-                container.innerHTML = `<p style="color: var(--gray); font-size: 0.9rem;">No results yet</p>`;
-                return;
-            }
+    } catch (error) {
+        console.error('Error loading results:', error);
+        container.innerHTML = `<p style="color: var(--gray); font-size: 0.9rem;">No results yet</p>`;
+    }
+}
 
-            const table = document.createElement('table');
-            table.className = 'results-table';
-            table.innerHTML = `
-                <thead>
-                    <tr>
-                        <th>Place</th>
-                        <th>Bib</th>
-                        <th>Time</th>
-                        ${showDeleteButtons ? '<th>Actions</th>' : ''}
-                    </tr>
-                </thead>
-                <tbody>
-                    ${results.map(result => `
-                        <tr>
-                            <td>
-                                <span class="place-badge ${getPlaceBadgeClass(result.place)}">
-                                    ${result.place}
-                                </span>
-                            </td>
-                            <td>#${result.bib_number}</td>
-                            <td><strong>${result.finish_time}</strong></td>
-                            ${showDeleteButtons ? `
-                                <td>
-                                    <button class="btn-icon danger" onclick="confirmDelete('result', '${result.id}')" title="Delete Result">🗑️</button>
-                                </td>
-                            ` : ''}
-                        </tr>
-                    `).join('')}
-                </tbody>
-            `;
 
-            container.innerHTML = '';
-            container.appendChild(table);
-        }
+       function displayResults(results, container, eventId, showDeleteButtons) {
+    if (!results || results.length === 0) {
+        container.innerHTML = `<p style="color: var(--gray); font-size: 0.9rem;">No results yet</p>`;
+        return;
+    }
 
-        function getPlaceBadgeClass(place) {
-            if (place === 1) return 'place-1';
-            if (place === 2) return 'place-2';
-            if (place === 3) return 'place-3';
-            return 'place-other';
-        }
+    const table = document.createElement('table');
+    table.className = 'results-table';
+
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Place</th>
+                <th>Name</th>
+                <th>Bib</th>
+                <th>Time</th>
+                ${showDeleteButtons ? '<th>Actions</th>' : ''}
+            </tr>
+        </thead>
+        <tbody>
+            ${results.map(result => `
+                <tr>
+                    <td>
+                        <span class="place-badge ${getPlaceBadgeClass(result.place)}">
+                            ${result.place}
+                        </span>
+                    </td>
+                    <td>${result.runner_name}</td>
+                    <td>#${result.bib_number}</td>
+                    <td><strong>${result.finish_time}</strong></td>
+                    ${showDeleteButtons ? `
+                        <td>
+                            <button class="btn-icon danger" onclick="confirmDelete('result', '${result.id}')">🗑️</button>
+                        </td>
+                    ` : ''}
+                </tr>
+            `).join('')}
+        </tbody>
+    `;
+
+    container.innerHTML = '';
+    container.appendChild(table);
+}
+
+ function getPlaceBadgeClass(place) {
+    if (place === 1) return 'place-1';
+    if (place === 2) return 'place-2';
+    if (place === 3) return 'place-3';
+    return 'place-other';
+}
+
 
         function setupRealtimeSubscription(eventId, showDeleteButtons) {
             // Unsubscribe from previous subscription if exists
