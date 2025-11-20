@@ -2154,7 +2154,7 @@ function silentUpdateResultsTable(container, results, eventId, showDeleteButtons
 setInterval(() => {
     const active = document.getElementById('meet-details-page').classList.contains('active');
     if (active && currentMeetId) {
-        silentRefreshMeetEvents(currentMeetId);
+       silentUpdateResultsTable(container, results, eventId, showDeleteButtons)
     }
 }, 3000); 
 
