@@ -1161,20 +1161,34 @@
                 console.error('Error checking auth:', error);
             }
         }
-        
-        async function silentRefreshMeetEvents(meetId) {
-    try {
-        const { data: events, error } = await supabase
-            .from('events')
-            .select('*')
-            .eq('meet_id', meetId)
-            .order('created_at', { ascending: true });
+        function compareEvents(oldList, newList) {
+    if (oldList.length !== newList.length) return false;
+    return JSON.stringify(oldList) !== JSON.stringify(newList);
+}
 
-        if (error) return;
+        let lastEventList = null;
+
+async function silentRefreshMeetEvents(meetId) {
+    const { data: events, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('meet_id', meetId)
+        .order('created_at', { ascending: true });
+
+    if (error) return;
+
+    // If first load, store and stop blinking
+    if (!lastEventList) {
+        lastEventList = events;
+        return;
+    }
+
+    // Compare to last refresh
+    if (!compareEvents(lastEventList, events)) {
+        console.log("🔄 Changes found — updating silently");
 
         const container = document.getElementById('meetEventsContainer');
 
-        // Owner check
         const { data: meet } = await supabase
             .from('meets')
             .select('created_by')
@@ -1183,10 +1197,10 @@
 
         const isOwner = currentUser && meet && meet.created_by === currentUser.id;
 
-        // Rebuild events WITHOUT showing a loading spinner
-        displayEvents(events, container, isOwner);
-    } catch (err) {
-        console.error("Silent refresh error:", err);
+        // Only update events (does NOT rebuild whole UI → NO BLINK)
+        displayEvents(events, container, isOwner, true);
+
+        lastEventList = events;
     }
 }
 
@@ -1552,18 +1566,29 @@
             }
         }
 
-        function displayEvents(events, container, showActions) {
-            container.innerHTML = '<div class="results-section"><div class="section-header"><h2>Events</h2></div><div class="event-list"></div></div>';
-            const eventList = container.querySelector('.event-list');
+        function displayEvents(events, container, showActions, silent = false) {
+    if (!silent) {
+        container.innerHTML = `
+            <div class="results-section">
+                <div class="section-header">
+                    <h2>Events</h2>
+                </div>
+                <div class="event-list"></div>
+            </div>`;
+    }
 
-            events.forEach(event => {
-                const eventItem = createEventItem(event, showActions);
-                eventList.appendChild(eventItem);
-                setTimeout(() => {
-            loadEventResults(event.id, showActions);
-        }, 10);
-            });
-        }
+    const list = container.querySelector('.event-list');
+
+    // Clear only event items, not the entire container
+    list.innerHTML = '';
+
+    events.forEach(event => {
+        const item = createEventItem(event, showActions);
+        list.appendChild(item);
+        loadEventResults(event.id, showActions, silent);
+    });
+}
+
 
         function createEventItem(event, showActions) {
             const item = document.createElement('div');
@@ -2113,14 +2138,11 @@
             console.log('✅ EasyXC Live initialized successfully');
            // 🔄 Silent auto-refresh events list every 5 seconds
 setInterval(() => {
-    const isActive = document
-        .getElementById('meet-details-page')
-        .classList.contains('active');
-
-    if (isActive && currentMeetId) {
+    if (document.getElementById('meet-details-page').classList.contains('active') && currentMeetId) {
         silentRefreshMeetEvents(currentMeetId);
     }
 }, 1000);
+
 
             
         });
