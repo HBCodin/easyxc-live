@@ -1166,7 +1166,8 @@
     return JSON.stringify(oldList) !== JSON.stringify(newList);
 }
 
-        let lastEventList = null;
+      // Cache last event list
+let lastEventMap = new Map();
 
 async function silentRefreshMeetEvents(meetId) {
     const { data: events, error } = await supabase
@@ -1177,32 +1178,47 @@ async function silentRefreshMeetEvents(meetId) {
 
     if (error) return;
 
-    // If first load, store and stop blinking
-    if (!lastEventList) {
-        lastEventList = events;
-        return;
-    }
+    const container = document.getElementById('meetEventsContainer');
+    const list = container.querySelector('.event-list');
 
-    // Compare to last refresh
-    if (!compareEvents(lastEventList, events)) {
-        console.log("🔄 Changes found — updating silently");
+    if (!list) return; // safety
 
-        const container = document.getElementById('meetEventsContainer');
+    // Convert array to map for easy comparison
+    const newEventMap = new Map(events.map(e => [e.id, e]));
 
-        const { data: meet } = await supabase
-            .from('meets')
-            .select('created_by')
-            .eq('id', meetId)
-            .single();
+    // 🔥 1. REMOVE deleted events
+    lastEventMap.forEach((oldEvent, id) => {
+        if (!newEventMap.has(id)) {
+            const el = list.querySelector(`[data-event-id="${id}"]`);
+            if (el) el.remove();
+        }
+    });
 
-        const isOwner = currentUser && meet && meet.created_by === currentUser.id;
+    // 🔥 2. ADD or UPDATE events
+    newEventMap.forEach((event, id) => {
+        const existing = list.querySelector(`[data-event-id="${id}"]`);
 
-        // Only update events (does NOT rebuild whole UI → NO BLINK)
-        displayEvents(events, container, isOwner, true);
+        if (!existing) {
+            // Add new event
+            const item = createEventItem(event, isMeetOwner(meetId));
+            item.setAttribute("data-event-id", id);
+            list.appendChild(item);
 
-        lastEventList = events;
-    }
+            // Load results silently
+            loadEventResults(event.id, isMeetOwner(meetId), true);
+        } else {
+            // Update only if changed (name, type, status)
+            const title = existing.querySelector(".event-title");
+            if (title && title.textContent !== event.name) {
+                title.textContent = event.name;
+            }
+        }
+    });
+
+    // Save new state
+    lastEventMap = newEventMap;
 }
+
 
         async function signIn(email, password) {
             if (!supabase) {
@@ -2138,10 +2154,11 @@ async function silentRefreshMeetEvents(meetId) {
             console.log('✅ EasyXC Live initialized successfully');
            // 🔄 Silent auto-refresh events list every 5 seconds
 setInterval(() => {
-    if (document.getElementById('meet-details-page').classList.contains('active') && currentMeetId) {
+    const active = document.getElementById('meet-details-page').classList.contains('active');
+    if (active && currentMeetId) {
         silentRefreshMeetEvents(currentMeetId);
     }
-}, 1000);
+}, 3000); 
 
 
             
